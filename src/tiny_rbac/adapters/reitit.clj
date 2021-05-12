@@ -5,8 +5,8 @@
 
 (def action-mapping
   {:get    :read
-   :post   :update
-   :put    :create
+   :post   :create
+   :put    :update
    :delete :delete})
 
 (defn- ->resource
@@ -34,8 +34,8 @@
   |req:    | action: |
   |------- |---------|
   |:get    | :read   |
-  |:post   | :update |
-  |:put    | :create |
+  |:post   | :create |
+  |:put    | :update |
   |:delete | :delete |"
   ([{{user :user}             :session-data
      roles                    :acl/roles

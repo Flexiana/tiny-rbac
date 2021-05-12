@@ -1,5 +1,6 @@
 (ns tiny-rbac.interceptor
-  (:require [tiny-rbac.adapters.reitit :as acl]))
+  (:require
+    [tiny-rbac.adapters.reitit :as acl]))
 
 (defn acl-restrict
   ([]

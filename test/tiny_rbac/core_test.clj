@@ -137,19 +137,34 @@
   (is (= :all (has-access complex-roles {:roles [:guest :member :superuser] :resource "posts" :privilege :create})))
   (is (= #{:own :friends} (has-access complex-roles {:roles [:guest :member :staff] :resource "comments" :privilege :react}))))
 
-
 (def role-inheritance
   {:guest  [{:resource "posts"
              :actions  [:read]
              :over     :all}]
-   :member {:inherit     [:guest]
+   :member {:inherit     :guest
             :permissions [{:resource "posts"
                            :actions  [:create :update :delete]
                            :over     :own}]}
-   :staff {:inherit [member]
-           :permissions [{:resource "posts"
-                          :actions  [:wipe]
-                          :over     :all}]}})
+   :staff  {:inherit     :member
+            :permissions [{:resource "posts"
+                           :actions  [:wipe]
+                           :over     :all}
+                          {:resource "users"
+                           :actions  [:ban]
+                           :over     :all}]}
+   :stupid {:inherit :guest
+            :permissions [{:resource "users"
+                           :actions  [:ban]
+                           :over     :all}]}})
 
-(deftest inheritance-test)
-(is (= :all (has-access complex-roles {:roles [:guest :member] :resource "posts" :privilege :read})))
+(deftest inheritance-test
+  (is (= :all (has-access role-inheritance {:role :guest :resource "posts" :privilege :read})))
+  (is (false? (has-access role-inheritance {:role :guest :resource "posts" :privilege :wipe})))
+  (is (= :all (has-access role-inheritance {:role :member :resource "posts" :privilege :read})))
+  (is (= :own (has-access role-inheritance {:role :member :resource "posts" :privilege :create})))
+  (is (false? (has-access role-inheritance {:role :member :resource "posts" :privilege :wipe})))
+  (is (= :all (has-access role-inheritance {:role :staff :resource "posts" :privilege :read})))
+  (is (= :own (has-access role-inheritance {:role :staff :resource "posts" :privilege :update})))
+  (is (= :all (has-access role-inheritance {:role :staff :resource "posts" :privilege :wipe})))
+  (is (= :own (has-access role-inheritance {:roles [:staff :member] :resource "posts" :privilege :create})))
+  (is (= :all (has-access role-inheritance {:role :stupid :resource "users" :privilege :ban}))))
