@@ -186,6 +186,3 @@
          new-actions (con-set old-actions actions)]
      (assoc-in roleset [:roles role resource] new-actions))))
 
-
-
-

@@ -3,6 +3,8 @@
             [tiny-rbac.builder :as b]
             [tiny-rbac.core :as c]))
 
+(declare thrown-with-msg?)
+
 (deftest add-resource
   (is (= #{:comment}
          (-> (b/add-resource {} :comment)
@@ -144,16 +146,16 @@
   (is (= {:roles {:poster {}
                   :admin  {}}}
          (b/add-role {} [:poster :admin])))
-  (is (= {:poster {:post #{:read}}}
+  (is (= #{:read}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster :post :read)
-             :roles)))
-  (is (= {:poster {:post #{:read :write}}}
+             (c/roles :poster :post))))
+  (is (= #{:read :write}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster :post [:read :write])
-             :roles)))
+             (c/roles :poster :post))))
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred action does not exists"
                         (-> (b/add-resource {} :post)
