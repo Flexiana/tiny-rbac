@@ -48,7 +48,12 @@
          (-> (b/add-resource {} [:post :tag])
              (b/delete-resource [:post :tag])
              (c/resources)))
-      "can delete multiple resources")
+      "can delete multiple resources by name")
+  (is (= #{}
+         (-> (b/add-resource {} [:post :tag])
+             (b/delete-resource :all)
+             (c/resources)))
+      "can delete all resources")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
                         (b/delete-resource {} :comment))
@@ -96,6 +101,12 @@
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/delete-resource :comment)))
+      "deleting resources removes actions too")
+  (is (= {:resources #{}, :actions {}}
+         (-> (b/add-resource {} [:comment :post])
+             (b/add-action :comment :read)
+             (b/add-action :post :read)
+             (b/delete-resource :all)))
       "deleting resources removes actions too"))
 
 (deftest delete-action
@@ -110,4 +121,19 @@
              (b/add-action :comment [:read :write :tag])
              (b/delete-action :comment [:read :write])
              (c/actions :comment)))
-      "deleting multiple actions"))
+      "deleting multiple actions")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred resource does not exists"
+                        (b/delete-action {} :comment [:read :write]))
+      "Throwing error when resource not defined")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred action does not exists"
+                        (-> (b/add-resource {} :comment)
+                            (b/delete-action :comment :read)))
+      "Throwing error when action not found")
+  (is (= #{}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :write :tag])
+             (b/delete-action :comment :all)
+             (c/actions :comment)))
+      "deleting all actions"))
