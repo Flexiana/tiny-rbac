@@ -44,6 +44,11 @@
              (b/delete-resource [:post :tag])
              (c/resources)))
       "can delete multiple resources")
+  (is (= #{}
+         (-> (b/add-resource {} [:post :tag])
+             (b/delete-resource [:post :tag])
+             (c/resources)))
+      "can delete multiple resources")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
                         (b/delete-resource {} :comment))
@@ -75,3 +80,10 @@
                         #"referred resource does not exists"
                         (b/add-action {} :comment :read))
       "Throws an Exception when resource not available"))
+
+(deftest delete-resource-deletes-actions
+  (is (= {:resources #{}, :actions {}}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment :read)
+             (b/delete-resource :comment)))
+      "deleting resources removes actions too"))

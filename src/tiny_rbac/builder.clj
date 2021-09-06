@@ -142,7 +142,9 @@
   (let [resources (collify resource)]
     (if (some nil? (map #(c/resource roleset %) resources))
       (throw (IllegalArgumentException. "referred resource does not exists"))
-      (reduce (fn [rs res] (update rs :resources disj res))
+      (reduce (fn [rs res]
+                (-> (update rs :resources disj res)
+                    (update :actions dissoc res)))
               roleset
               resources))))
 
