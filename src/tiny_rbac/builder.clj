@@ -154,6 +154,12 @@
     (update-in roleset [:actions resource] con-set (collify action))
     (throw (IllegalArgumentException. "referred resource does not exists"))))
 
-(defn delete-action [roleset resource action])
+(defn delete-action [roleset resource action]
+  (let [actions (collify action)]
+    (reduce (fn [rs ac]
+              (update-in rs [:actions resource] disj ac))
+            roleset
+            actions)))
+
 
 

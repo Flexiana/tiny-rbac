@@ -98,10 +98,16 @@
              (b/delete-resource :comment)))
       "deleting resources removes actions too"))
 
-(deftest delete-action)
-(is (= #{:read}
-       (-> (b/add-resource {} :comment)
-           (b/add-action :comment [:read :tag])
-           (b/delete-action :comment :read)
-           (c/actions :comment)))
-    "deleting resources removes actions too")
+(deftest delete-action
+  (is (= #{:tag}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :tag])
+             (b/delete-action :comment :read)
+             (c/actions :comment)))
+      "deleting action")
+  (is (= #{:tag}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :write :tag])
+             (b/delete-action :comment [:read :write])
+             (c/actions :comment)))
+      "deleting multiple actions"))
