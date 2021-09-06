@@ -103,6 +103,10 @@
   (-> roleset
       :actions
       (get resource)
-      action))
+      (get action)))
+
+(defn roles [roleset role resource]
+  (get-in roleset [:roles role resource]))
+
 
 

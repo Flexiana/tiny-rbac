@@ -169,5 +169,23 @@
             roleset
             actions)))
 
+(defn add-role
+  ([roleset role]
+   (let [roles (collify role)]
+     (reduce (fn [rs r]
+               (assoc-in rs [:roles r] {}))
+             roleset
+             roles)))
+  ([roleset role resource action]
+   (when-not (c/resource roleset resource)
+     (throw (IllegalArgumentException. "referred resource does not exists")))
+   (when (some nil? (map #(c/action roleset resource %) (collify action)))
+     (throw (IllegalArgumentException. "referred action does not exists")))
+   (let [actions (collify action)
+         old-actions (c/roles roleset role resource)
+         new-actions (con-set old-actions actions)]
+     (assoc-in roleset [:roles role resource] new-actions))))
+
+
 
 

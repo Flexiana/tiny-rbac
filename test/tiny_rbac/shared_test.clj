@@ -137,3 +137,27 @@
              (b/delete-action :comment :all)
              (c/actions :comment)))
       "deleting all actions"))
+
+(deftest add-role
+  (is (= {:roles {:poster {}}}
+         (b/add-role {} :poster)))
+  (is (= {:roles {:poster {}
+                  :admin  {}}}
+         (b/add-role {} [:poster :admin])))
+  (is (= {:poster {:post #{:read}}}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster :post :read)
+             :roles)))
+  (is (= {:poster {:post #{:read :write}}}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster :post [:read :write])
+             :roles)))
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred action does not exists"
+                        (-> (b/add-resource {} :post)
+                            (b/add-role :poster :post :read))))
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred resource does not exists"
+                        (b/add-role {} :poster :post :read))))
