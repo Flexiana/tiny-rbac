@@ -106,7 +106,16 @@
       (get action)))
 
 (defn roles [roleset role resource]
-  (get-in roleset [:roles role resource]))
+  (get-in roleset [:roles role :resources resource]))
+
+(defn inherit
+  [roleset role]
+  (get-in roleset [:roles role :inherits]))
+
+(defn role [roleset role]
+  (get-in roleset [:roles role]))
+
+
 
 
 

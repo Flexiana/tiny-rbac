@@ -163,3 +163,40 @@
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
                         (b/add-role {} :poster :post :read))))
+
+(deftest add-inheritance
+  (is (= #{:poster}
+         (-> (b/add-role {} :reader)
+             (b/add-role :poster)
+             (b/add-inheritance :reader :poster)
+             (c/inherit :reader)))
+      "Add role as inheritance")
+  (is (= #{:poster :admin}
+         (-> (b/add-role {} :reader)
+             (b/add-role :poster)
+             (b/add-role :admin)
+             (b/add-inheritance :reader [:poster :admin])
+             (c/inherit :reader)))
+      "Add roles as inheritance")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred role does not exists"
+                        (-> (b/add-role {} :reader)
+                            (b/add-inheritance :reader :poster)))
+      "Add missing role as inheritance")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred role does not exists"
+                        (-> (b/add-role {} :reader)
+                            (b/add-role :admin)
+                            (b/add-inheritance :reader [:admin :poster])))
+      "Add missing role as inheritance")
+  (is (= #{:poster}
+         (-> (b/add-role {} :poster)
+             (b/add-inheritance :reader :poster)
+             (c/inherit :reader)))
+      "Creating role with only inheritance")
+  (is (= #{:poster :admin}
+         (-> (b/add-role {} :poster)
+             (b/add-role :admin)
+             (b/add-inheritance :reader [:poster :admin])
+             (c/inherit :reader)))
+      "Creating role with multiple inheritances"))

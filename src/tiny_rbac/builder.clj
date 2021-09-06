@@ -184,5 +184,14 @@
    (let [actions (collify action)
          old-actions (c/roles roleset role resource)
          new-actions (con-set old-actions actions)]
-     (assoc-in roleset [:roles role resource] new-actions))))
+     (assoc-in roleset [:roles role :resources resource] new-actions))))
+
+(defn add-inheritance
+  [roleset role inherits]
+  (when (some nil? (map #(c/role roleset %) (collify inherits)))
+    (throw (IllegalArgumentException. "referred role does not exists")))
+  (let [inheritances (collify inherits)]
+    (update-in roleset [:roles role :inherits] con-set inheritances)))
+
+
 
