@@ -96,7 +96,13 @@
        (filter (hash-set resource))
        first))
 
-(defn get-actions [roleset resource]
+(defn actions [roleset resource]
   (get-in roleset [:actions resource]))
+
+(defn action [roleset resource action]
+  (-> roleset
+      :actions
+      (get resource)
+      action))
 
 

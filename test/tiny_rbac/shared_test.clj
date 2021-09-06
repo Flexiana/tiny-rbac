@@ -63,19 +63,29 @@
   (is (= #{:read}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
-             (c/get-actions :comment)))
+             (c/actions :comment)))
       "Add an action to resource")
   (is (= #{:read :write}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :write])
-             (c/get-actions :comment)))
+             (c/actions :comment)))
       "Add multiple actions to resource")
   (is (= #{:read :delete :write}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :write])
              (b/add-action :comment [:read :write :delete])
-             (c/get-actions :comment)))
+             (c/actions :comment)))
       "Add actions multiple times to resource")
+  (is (= :read
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :write :delete])
+             (c/action :comment :read)))
+      "Get action by resource and action")
+  (is (= nil
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:write :delete])
+             (c/action :comment :read)))
+      "Response with nil if action missing from resource")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
                         (b/add-action {} :comment :read))
@@ -87,3 +97,11 @@
              (b/add-action :comment :read)
              (b/delete-resource :comment)))
       "deleting resources removes actions too"))
+
+(deftest delete-action)
+(is (= #{:read}
+       (-> (b/add-resource {} :comment)
+           (b/add-action :comment [:read :tag])
+           (b/delete-action :comment :read)
+           (c/actions :comment)))
+    "deleting resources removes actions too")
