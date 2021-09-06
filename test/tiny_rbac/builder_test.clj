@@ -1,13 +1,13 @@
-(ns tiny-rbac.builder.builder-functions-test
+(ns tiny-rbac.builder-test
   (:require
     [clojure.test :refer :all]
-    [tiny-rbac.builder.core :refer [add-actions
-                                    override-actions
-                                    remove-resource
-                                    allow
-                                    deny
-                                    revoke
-                                    grant]]))
+    [tiny-rbac.builder :refer [add-actions
+                               override-actions
+                               remove-resource
+                               allow
+                               deny
+                               revoke
+                               grant]]))
 
 (deftest build-roles-allow
   (is (= {:guest [{:resource "posts", :actions [:read], :over :all}]}

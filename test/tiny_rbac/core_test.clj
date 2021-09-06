@@ -1,7 +1,7 @@
 (ns tiny-rbac.core-test
   (:require
     [clojure.test :refer :all]
-    [tiny-rbac.core :refer [has-access]]))
+    [tiny-rbac.core :refer :all]))
 
 (def custom-roles
   {:customer         [{:resource "items"
@@ -152,7 +152,7 @@
                           {:resource "users"
                            :actions  [:ban]
                            :over     :all}]}
-   :stupid {:inherit :guest
+   :stupid {:inherit     :guest
             :permissions [{:resource "users"
                            :actions  [:ban]
                            :over     :all}]}})
@@ -168,3 +168,48 @@
   (is (= :all (has-access role-inheritance {:role :staff :resource "posts" :privilege :wipe})))
   (is (= :own (has-access role-inheritance {:roles [:staff :member] :resource "posts" :privilege :create})))
   (is (= :all (has-access role-inheritance {:role :stupid :resource "users" :privilege :ban}))))
+
+
+(def multi-inheritance
+  {:one        [{:resource "posts"
+                 :actions  [:read]
+                 :over     :all}]
+   :other      [{:resource "comments"
+                 :actions  [:read]
+                 :over     :all}]
+   :another    {:inherit [:one :other]}
+   :fourth     {:inherit [:other]}
+   :fifth      {:inherit :fourth}
+   :sixth      {:inherit :fifth}
+   :circular-1 {:inherit :circular-2}
+   :circular-2 {:inherit :circular-1}})
+
+(has-access multi-inheritance {:role :another :resource "posts" :privilege :read})
+
+(defn inheritance-graph->vector
+  [permissions role]
+  (loop [role role
+         per (get permissions role)
+         inheritance #{}]
+    (cond
+      (inheritance role) inheritance
+      (and (map? per) (:inherit per)) (conj inheritance (inheritance-graph->vector inheritance (per :inherit))))))
+
+
+(inheritance-graph->vector multi-inheritance :another)
+
+(-> (reduce (fn [acc [k v]] (if (:inherit v)
+                              (conj acc (flatten [k (:inherit v)]))
+                              (conj acc [k]))) [] multi-inheritance))
+(deftest collect-users-roles
+  (is (= [:guest] (user->roles {:role :guest})))
+  (is (= [:staff :member] (user->roles {:roles [:staff :member]}))))
+
+;(deftest collect-inherited-roles
+;  (is (= [] (inheritance multi-inheritance :one)))
+;  (is (= [] (inheritance multi-inheritance :other)))
+;  (is (= [:one :other] (inheritance multi-inheritance :another)))
+;  (is (= [:fourth :other] (inheritance multi-inheritance :fifth)))
+;  (is (= [:fifth :fourth :other] (inheritance multi-inheritance :sixth)))
+;  (is (= [:circular-2] (inheritance multi-inheritance :circular-1)))
+;  (is (= [:circular-1] (inheritance multi-inheritance :circular-2))))

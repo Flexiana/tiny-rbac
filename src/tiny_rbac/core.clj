@@ -37,13 +37,7 @@
     (:is_staff user) (assoc access :role :staff)
     (:is_active user) (assoc access :role :member)))
 
-(defn- resolve-single-role
-  [permissions access]
-  (if-let [granted (grantee permissions access)]
-    (:over granted)
-    false))
-
-(defn- resolve-multi-role
+(defn- resolve
   [permissions access]
   (let [result-set (->> (for [role (:roles access)]
                           (grantee permissions (assoc access :role role)))
@@ -69,6 +63,40 @@
      (has-access permissions (user->access user access))))
   ([permissions access]
    (if (:role access)
-     (resolve-single-role permissions access)
-     (resolve-multi-role permissions access))))
+     (resolve permissions (assoc access :roles [(:role access)]))
+     (resolve permissions access))))
+
+
+(defn user->roles [user]
+  (or (:roles user)
+      (vector (:role user))))
+
+;(defn inheritance
+;  [permissions role]
+;  (let [inherit (get-in permissions [role :inherit] [])
+;        inherit-v (if (vector? inherit)
+;                    inherit
+;                    [inherit])]
+;    (apply concat inherit-v (for [r inherit-v]
+;                              (inheritance permissions r)))))
+
+(defn allowed
+  [permissions user resource action]
+  (let [roles (user->roles user)]))
+
+(defn resources [roleset]
+  (:resources roleset))
+
+(defn empty->nil
+  [c]
+  (when-not (empty? c) c))
+
+(defn resource [roleset resource]
+  (->> (resources roleset)
+       (filter (hash-set resource))
+       first))
+
+(defn get-actions [roleset resource]
+  (get-in roleset [:actions resource]))
+
 
