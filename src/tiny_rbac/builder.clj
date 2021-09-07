@@ -6,7 +6,7 @@
   [new orig]
   (into #{} (concat orig new)))
 
-(defn check-resource
+(defn valid-resource
   [roleset resource]
   (let [resources (if (= :all resource)
                     (c/resources roleset)
@@ -15,7 +15,7 @@
       (throw (IllegalArgumentException. "referred resource does not exists"))
       resources)))
 
-(defn check-action
+(defn valid-action
   [roleset resource action]
   (let [actions (if (= :all action)
                   (c/actions roleset resource)
@@ -24,18 +24,26 @@
       (throw (IllegalArgumentException. "referred action does not exists"))
       actions)))
 
-(defn check-role [roleset role]
+(defn valid-role [roleset role]
   (when (some nil? (map #(c/role roleset %) (c/collify role)))
     (throw (IllegalArgumentException. "referred role does not exists"))))
 
-(defn check-cyclic-inheritance
+(defn valid-access [roleset role resource action access]
+  (let [accesses (if (= :all access)
+                   (c/accesses roleset role resource action)
+                   (c/collify access))]
+    (if (some nil? (map #(c/access roleset role resource action %) accesses))
+      (throw (IllegalArgumentException. "referred action does not exists"))
+      accesses)))
+
+(defn valid-cyclic-inheritance
   [roleset role inherits]
   (let [inheritances (into #{} (c/collify inherits))]
     (if (inheritances role)
       (throw (IllegalArgumentException. (str "Circular inheritance detected for " role)))
       (doseq [i inheritances]
         (when (c/inherit roleset i)
-          (check-cyclic-inheritance roleset role (c/inherit roleset i)))))))
+          (valid-cyclic-inheritance roleset role (c/inherit roleset i)))))))
 
 (defn add-resource
   [roleset resources]
@@ -43,7 +51,7 @@
 
 (defn delete-resource
   [roleset resource]
-  (let [resources (check-resource roleset resource)]
+  (let [resources (valid-resource roleset resource)]
     (reduce (fn [rs res] (-> (update rs :resources disj res)
                              (update :actions dissoc res)))
             roleset
@@ -51,12 +59,12 @@
 
 (defn add-action
   [roleset resource action]
-  (check-resource roleset resource)
+  (valid-resource roleset resource)
   (update-in roleset [:actions resource] con-set (c/collify action)))
 
 (defn delete-action [roleset resource action]
-  (check-resource roleset resource)
-  (let [actions (check-action roleset resource action)]
+  (valid-resource roleset resource)
+  (let [actions (valid-action roleset resource action)]
     (reduce (fn [rs ac]
               (update-in rs [:actions resource] disj ac))
             roleset
@@ -73,33 +81,22 @@
 
 (defn add-inheritance
   [roleset role inherits]
-  (check-role roleset inherits)
-  (check-cyclic-inheritance roleset role inherits)
+  (valid-role roleset inherits)
+  (valid-cyclic-inheritance roleset role inherits)
   (update-in roleset [:roles role :inherits] con-set (c/collify inherits)))
 
 (defn add-access
   [roleset role resource action access]
-  (check-resource roleset resource)
-  (check-action roleset resource action)
-  (check-role roleset role)
+  (valid-resource roleset resource)
+  (valid-action roleset resource action)
+  (valid-role roleset role)
   (update-in roleset [:roles role resource action] con-set (c/collify access)))
 
-
-
-(defn check-access [roleset role resource action access]
-  (let [accesses (if (= :all access)
-                   (c/accesses roleset role resource action)
-                   (c/collify access))]
-    (if (some nil? (map #(c/access roleset role resource action %) accesses))
-      (throw (IllegalArgumentException. "referred action does not exists"))
-      accesses)))
-
-
 (defn delete-access [roleset role resource action access]
-  (check-resource roleset resource)
-  (check-action roleset resource action)
-  (check-role roleset role)
-  (let [acc (check-access roleset role resource action access)]
+  (valid-resource roleset resource)
+  (valid-action roleset resource action)
+  (valid-role roleset role)
+  (let [acc (valid-access roleset role resource action access)]
     (reduce (fn [rs ac]
               (update-in rs [:roles role resource action] disj ac))
             roleset

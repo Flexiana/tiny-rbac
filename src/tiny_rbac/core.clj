@@ -33,17 +33,16 @@
   (get (roles roleset) role))
 
 (defn accesses
-  [roleset role resource action]
-  (->> (collify role)
-       (reduce (fn [acc role]
-                 (let [inherit (inherit roleset role)]
-                   (cond-> (into acc (collify (get-in roleset [:roles role resource action])))
-                           inherit (into (mapcat identity
-                                                 (for [i (collify inherit)]
-                                                   (accesses roleset i resource action)))))))
-               #{})
-       (filter some?)
-       (into #{})))
+  ([roleset role resource action]
+   (accesses roleset role resource action #{}))
+  ([roleset role resource action acc]
+   (->> (let [inherit (inherit roleset role)]
+          (cond-> (into acc (collify (get-in roleset [:roles role resource action])))
+                  inherit (into (mapcat identity
+                                        (for [i (collify inherit)]
+                                          (accesses roleset i resource action acc))))))
+        (filter some?)
+        (into #{}))))
 
 (defn access
   [roleset role resource action access]
