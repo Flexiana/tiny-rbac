@@ -145,38 +145,7 @@
          (b/add-role {} :poster)))
   (is (= {:roles {:poster {}
                   :admin  {}}}
-         (b/add-role {} [:poster :admin])))
-  (is (= #{:read}
-         (-> (b/add-resource {} :post)
-             (b/add-action :post [:read :write])
-             (b/add-role :poster :post :read)
-             (c/roles :poster :post))))
-  (is (= #{:read :write}
-         (-> (b/add-resource {} :post)
-             (b/add-action :post [:read :write])
-             (b/add-role :poster :post [:read :write])
-             (c/roles :poster :post))))
-  (is (= #{:read :write}
-         (-> (b/add-resource {} :post)
-             (b/add-action :post [:read :write])
-             (b/add-role :poster)
-             (b/add-role :poster :post :read)
-             (b/add-role :poster :post :write)
-             (c/roles :poster :post))))
-  (is (= #{:read :write}
-         (-> (b/add-resource {} :post)
-             (b/add-action :post [:read :write])
-             (b/add-role :poster :post :read)
-             (b/add-role :poster :post :write)
-             (b/add-role :poster)
-             (c/roles :poster :post))))
-  (is (thrown-with-msg? IllegalArgumentException
-                        #"referred action does not exists"
-                        (-> (b/add-resource {} :post)
-                            (b/add-role :poster :post :read))))
-  (is (thrown-with-msg? IllegalArgumentException
-                        #"referred resource does not exists"
-                        (b/add-role {} :poster :post :read))))
+         (b/add-role {} [:poster :admin]))))
 
 (deftest add-inheritance
   (is (= #{:poster}
@@ -249,3 +218,43 @@
                             (b/add-inheritance :4 :3)
                             (b/add-inheritance :1 :4)))
       "indirect circular inheritance detected"))
+
+(deftest add-access
+  (is (= #{:all}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster)
+             (b/add-access :poster :post :read :all)
+             (c/access :poster :post :read)))
+      "add single access")
+  (is (= #{:own :friend}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster)
+             (b/add-access :poster :post :read [:own :friend])
+             (c/access :poster :post :read)))
+      "add multiple access")
+  (is (= #{:own :friend}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster)
+             (b/add-access :poster :post :read :own)
+             (b/add-access :poster :post :read :friend)
+             (c/access :poster :post :read)))
+      "add access multiple times")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred role does not exists"
+                        (-> (b/add-resource {} :post)
+                            (b/add-action :post [:read :write])
+                            (b/add-access :poster :post :read :all)))
+      "Missing role")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred action does not exists"
+                        (-> (b/add-resource {} :post)
+                            (b/add-action :post [:write])
+                            (b/add-access :poster :post :read :all)))
+      "Missing action")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred resource does not exists"
+                        (b/add-access {} :poster :post :read :all))
+      "Missing action"))
