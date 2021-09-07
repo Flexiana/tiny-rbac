@@ -1,4 +1,4 @@
-(ns tiny-rbac.shared-test
+(ns tiny-rbac.test
   (:require [clojure.test :refer :all]
             [tiny-rbac.builder :as b]
             [tiny-rbac.core :as c]))
