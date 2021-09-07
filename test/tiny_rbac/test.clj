@@ -284,3 +284,21 @@
                             (b/add-access :poster :post :read :own)
                             (b/delete-access :poster :post :read [:own :friend])))
       "delete missing access"))
+
+(deftest access-by-inheritance
+  (let [roleset (-> (b/add-resource {} :post)
+                    (b/add-action :post [:read :write])
+                    (b/add-role :reader)
+                    (b/add-role :poster)
+                    (b/add-access :reader :post :read [:own :friend])
+                    (b/add-access :poster :post :write :own)
+                    (b/add-inheritance :poster :reader))]
+    (is (= #{:own :friend}
+           (c/accesses roleset :poster :post :read)))
+    (is (= #{:own :friend}
+           (c/accesses roleset :reader :post :read)))
+    (is (= #{:own}
+           (c/accesses roleset :poster :post :write)))
+    (is (= #{}
+           (c/accesses roleset :reader :post :write)))))
+
