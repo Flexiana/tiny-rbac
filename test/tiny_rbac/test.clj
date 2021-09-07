@@ -225,14 +225,14 @@
              (b/add-action :post [:read :write])
              (b/add-role :poster)
              (b/add-access :poster :post :read :all)
-             (c/access :poster :post :read)))
+             (c/accesses :poster :post :read)))
       "add single access")
   (is (= #{:own :friend}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
              (b/add-access :poster :post :read [:own :friend])
-             (c/access :poster :post :read)))
+             (c/accesses :poster :post :read)))
       "add multiple access")
   (is (= #{:own :friend}
          (-> (b/add-resource {} :post)
@@ -240,7 +240,7 @@
              (b/add-role :poster)
              (b/add-access :poster :post :read :own)
              (b/add-access :poster :post :read :friend)
-             (c/access :poster :post :read)))
+             (c/accesses :poster :post :read)))
       "add access multiple times")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred role does not exists"
@@ -258,3 +258,29 @@
                         #"referred resource does not exists"
                         (b/add-access {} :poster :post :read :all))
       "Missing resource"))
+
+(deftest delete-access
+  (is (= #{:friend}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster)
+             (b/add-access :poster :post :read [:own :friend])
+             (b/delete-access :poster :post :read :own)
+             (c/accesses :poster :post :read)))
+      "delete single access")
+  (is (= #{}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster)
+             (b/add-access :poster :post :read [:own :friend])
+             (b/delete-access :poster :post :read [:own :friend])
+             (c/accesses :poster :post :read)))
+      "delete multi access")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"referred action does not exists"
+                        (-> (b/add-resource {} :post)
+                            (b/add-action :post [:read :write])
+                            (b/add-role :poster)
+                            (b/add-access :poster :post :read :own)
+                            (b/delete-access :poster :post :read [:own :friend])))
+      "delete missing access"))

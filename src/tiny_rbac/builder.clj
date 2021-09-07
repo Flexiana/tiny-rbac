@@ -87,3 +87,25 @@
   (check-action roleset resource action)
   (check-role roleset role)
   (update-in roleset [:roles role resource action] con-set (collify access)))
+
+
+
+(defn check-access [roleset role resource action access]
+  (let [accesses (if (= :all access)
+                   (c/accesses roleset role resource action)
+                   (collify access))]
+    (if (some nil? (map #(c/access roleset role resource action %) accesses))
+      (throw (IllegalArgumentException. "referred action does not exists"))
+      accesses)))
+
+
+(defn delete-access [roleset role resource action access]
+  (check-resource roleset resource)
+  (check-action roleset resource action)
+  (check-role roleset role)
+  (let [acc (check-access roleset role resource action access)]
+    (reduce (fn [rs ac]
+              (update-in rs [:roles role resource action] disj ac))
+            roleset
+            acc)))
+

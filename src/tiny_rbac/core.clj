@@ -19,6 +19,10 @@
 (defn role [roleset role]
   (get-in roleset [:roles role]))
 
-(defn access
+(defn accesses
   ([roleset role resource action]
    (get-in roleset [:roles role resource action])))
+
+(defn access
+  ([roleset role resource action access]
+   (get-in roleset [:roles role resource action access])))
