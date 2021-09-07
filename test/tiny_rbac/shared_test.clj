@@ -156,6 +156,20 @@
              (b/add-action :post [:read :write])
              (b/add-role :poster :post [:read :write])
              (c/roles :poster :post))))
+  (is (= #{:read :write}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster)
+             (b/add-role :poster :post :read)
+             (b/add-role :poster :post :write)
+             (c/roles :poster :post))))
+  (is (= #{:read :write}
+         (-> (b/add-resource {} :post)
+             (b/add-action :post [:read :write])
+             (b/add-role :poster :post :read)
+             (b/add-role :poster :post :write)
+             (b/add-role :poster)
+             (c/roles :poster :post))))
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred action does not exists"
                         (-> (b/add-resource {} :post)
@@ -178,6 +192,14 @@
              (b/add-inheritance :reader [:poster :admin])
              (c/inherit :reader)))
       "Add roles as inheritance")
+  (is (= #{:poster :admin}
+         (-> (b/add-role {} :reader)
+             (b/add-role :poster)
+             (b/add-role :admin)
+             (b/add-inheritance :reader [:poster :admin])
+             (b/add-inheritance :reader :admin)
+             (c/inherit :reader)))
+      "add-inheritance does not overwrites given inheritances")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred role does not exists"
                         (-> (b/add-role {} :reader)

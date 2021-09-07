@@ -173,7 +173,9 @@
   ([roleset role]
    (let [roles (collify role)]
      (reduce (fn [rs r]
-               (assoc-in rs [:roles r] {}))
+               (if-not (get-in rs [:roles r])
+                 (assoc-in rs [:roles r] {})
+                 rs))
              roleset
              roles)))
   ([roleset role resource action]
