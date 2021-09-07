@@ -186,12 +186,19 @@
          new-actions (con-set old-actions actions)]
      (assoc-in roleset [:roles role :resources resource] new-actions))))
 
+(defn check-cyclic-inheritance
+  [roleset role inherits]
+  (let [inheritances (into #{} (collify inherits))]
+    (if (inheritances role)
+      (throw (IllegalArgumentException. (str "Circular inheritance detected for " role)))
+      (doseq [i inheritances]
+        (when (c/inherit roleset i)
+          (check-cyclic-inheritance roleset role (c/inherit roleset i)))))))
+
 (defn add-inheritance
   [roleset role inherits]
   (when (some nil? (map #(c/role roleset %) (collify inherits)))
     (throw (IllegalArgumentException. "referred role does not exists")))
+  (check-cyclic-inheritance roleset role inherits)
   (let [inheritances (collify inherits)]
     (update-in roleset [:roles role :inherits] con-set inheritances)))
-
-
-

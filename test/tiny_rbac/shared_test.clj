@@ -193,10 +193,37 @@
          (-> (b/add-role {} :poster)
              (b/add-inheritance :reader :poster)
              (c/inherit :reader)))
-      "Creating role with only inheritance")
+      "Creating role for only inheritance")
   (is (= #{:poster :admin}
          (-> (b/add-role {} :poster)
              (b/add-role :admin)
              (b/add-inheritance :reader [:poster :admin])
              (c/inherit :reader)))
       "Creating role with multiple inheritances"))
+
+(deftest circular-inheritance
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"Circular inheritance detected for :reader"
+                        (-> (b/add-role {} :reader)
+                            (b/add-inheritance :reader :reader)))
+      "direct circular inheritance detected")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"Circular inheritance detected for :reader"
+                        (-> (b/add-role {} :reader)
+                            (b/add-role :poster)
+                            (b/add-inheritance :reader [:poster :reader])))
+      "direct circular inheritance detected")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"Circular inheritance detected for :reader"
+                        (-> (b/add-role {} :reader)
+                            (b/add-inheritance :poster :reader)
+                            (b/add-inheritance :reader :poster)))
+      "indirect circular inheritance detected")
+  (is (thrown-with-msg? IllegalArgumentException
+                        #"Circular inheritance detected for :1"
+                        (-> (b/add-role {} :1)
+                            (b/add-inheritance :2 :1)
+                            (b/add-inheritance :3 :2)
+                            (b/add-inheritance :4 :3)
+                            (b/add-inheritance :1 :4)))
+      "indirect circular inheritance detected"))
