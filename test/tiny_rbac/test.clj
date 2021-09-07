@@ -257,4 +257,4 @@
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
                         (b/add-access {} :poster :post :read :all))
-      "Missing action"))
+      "Missing resource"))

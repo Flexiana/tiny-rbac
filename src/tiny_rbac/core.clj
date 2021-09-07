@@ -4,18 +4,13 @@
   (:resources roleset))
 
 (defn resource [roleset resource]
-  (->> (resources roleset)
-       (filter (hash-set resource))
-       first))
+  (get-in roleset [:resources resource]))
 
 (defn actions [roleset resource]
   (get-in roleset [:actions resource]))
 
 (defn action [roleset resource action]
-  (-> roleset
-      :actions
-      (get resource)
-      (get action)))
+  (get-in roleset [:actions resource action]))
 
 (defn inherit
   [roleset role]
