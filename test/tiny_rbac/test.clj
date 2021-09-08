@@ -321,19 +321,19 @@
                                  :inherits #{:reader}}}}
            role-set))
     (is (= #{:own :friend}
-           (c/permissions role-set {:role  :poster
+           (c/permissions role-set {:role     :poster
                                     :resource :post
                                     :action   :read})))
     (is (= #{:own :friend}
-           (c/permissions role-set {:role  :reader
+           (c/permissions role-set {:role     :reader
                                     :resource :post
                                     :action   :read})))
     (is (= #{:own}
-           (c/permissions role-set {:role  :poster
+           (c/permissions role-set {:role     :poster
                                     :resource :post
                                     :action   :write})))
     (is (= #{}
-           (c/permissions role-set {:role  :reader
+           (c/permissions role-set {:role     :reader
                                     :resource :post
                                     :action   :write})))))
 
@@ -366,3 +366,33 @@
     (is (false?
           (c/has-permission role-set :reader :post :tag))
         "Doesn't have permission for invalid action")))
+
+(deftest building-role-set
+  (let [expected {:resources #{:post},
+                  :actions   {:post #{:read :write}},
+                  :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
+                              :poster {:permits  {:post {:write #{:own}}}
+                                       :inherits #{:reader}}}}]
+    (is (= expected
+           (-> (b/add-resource {} :post)
+               (b/add-action :post [:read :write])
+               (b/add-role :reader)
+               (b/add-role :poster)
+               (b/add-permission :reader :post :read [:own :friend])
+               (b/add-permission :poster :post :write :own)
+               (b/add-inheritance :poster :reader)))
+        "Build by code")
+    (is (= expected
+           (b/init {:resources :post
+                    :actions   {:post [:read :write]}
+                    :roles     {:reader {:permits {:post {:read [:own :friend]}}}
+                                :poster {:permits  {:post {:write :own}}
+                                         :inherits :reader}}}))
+        "Build from one map")
+    (is (= expected
+           (-> (b/init {:resources :post})
+               (b/init {:actions {:post [:read :write]}})
+               (b/init {:roles {:reader {:permits {:post {:read #{:own :friend}}}}}})
+               (b/init {:roles {:poster {:permits  {:post {:write #{:own}}}
+                                         :inherits #{:reader}}}})))
+        "Build from multiple maps")))

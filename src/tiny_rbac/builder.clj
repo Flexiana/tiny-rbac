@@ -102,3 +102,38 @@
             role-set
             acc)))
 
+(defn permit-reducer
+  [role-set role permits]
+  (reduce (fn [rs [resource permit]]
+            (reduce (fn [acc [action permission]]
+                      (add-permission acc role resource action permission))
+                    rs
+                    permit))
+          role-set permits))
+
+
+(defn init
+  ([role-set]
+   (init {} role-set))
+  ([initial-set {:keys [resources actions roles]}]
+   (let [role-names (keys roles)
+         with-resources (if resources
+                          (add-resource initial-set resources)
+                          initial-set)
+         with-actions (if actions
+                        (reduce (fn [acc [resource action]] (add-action acc resource action)) with-resources actions)
+                        with-resources)
+         with-roles (if roles
+                      (add-role with-actions role-names)
+                      with-actions)
+         with-permissions (if roles
+                            (reduce (fn [acc [role {:keys [permits inherits]}]]
+                                      (cond-> acc
+                                              permits (permit-reducer role permits)
+                                              inherits (add-inheritance role inherits)))
+                                    with-roles roles)
+                            with-roles)]
+     with-permissions)))
+
+
+
