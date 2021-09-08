@@ -2,7 +2,7 @@
   (:require
     [tiny-rbac.core :as c]))
 
-(defn con-set
+(defn- con-set
   [new orig]
   (into #{} (concat orig new)))
 
@@ -46,10 +46,13 @@
           (valid-cyclic-inheritance role-set role (c/inherit role-set i)))))))
 
 (defn add-resource
+  "Defines a new resource to the role-set"
   [role-set resources]
   (update role-set :resources con-set (c/collify resources)))
 
 (defn delete-resource
+  "Deletes a resource from the role-set, if it exist,
+  else throws Exception "
   [role-set resource]
   (let [resources (valid-resource role-set resource)]
     (reduce (fn [rs res] (-> (update rs :resources disj res)
@@ -58,11 +61,16 @@
             resources)))
 
 (defn add-action
+  "Defines a new action on resource
+  Throws exception when the resource is missing "
   [role-set resource action]
   (valid-resource role-set resource)
   (update-in role-set [:actions resource] con-set (c/collify action)))
 
-(defn delete-action [role-set resource action]
+(defn delete-action
+  "Deletes an action on resource.
+  Throws Exception when the resource or the action is missing"
+  [role-set resource action]
   (valid-resource role-set resource)
   (let [actions (valid-action role-set resource action)]
     (reduce (fn [rs ac]
@@ -71,6 +79,7 @@
             actions)))
 
 (defn add-role
+  "Defines a new role to the role-set"
   [role-set role]
   (reduce (fn [rs r] (if-not
                        (get-in rs [:roles r])
@@ -80,19 +89,29 @@
           (c/collify role)))
 
 (defn add-inheritance
+  "Adds inheritance to a role.
+  The parent role should exist, validates for cyclic inheritance.
+  On error throws an Exception"
   [role-set role inherits]
   (valid-role role-set inherits)
   (valid-cyclic-inheritance role-set role inherits)
   (update-in role-set [:roles role :inherits] con-set (c/collify inherits)))
 
 (defn add-permission
+  "Provides a permission for a role.
+  Validates for the resource, action and role.
+  On error throws an Exception"
   [role-set role resource action permission]
   (valid-resource role-set resource)
   (valid-action role-set resource action)
   (valid-role role-set role)
   (update-in role-set [:roles role :permits resource action] con-set (c/collify permission)))
 
-(defn delete-permission [role-set role resource action permission]
+(defn delete-permission
+  "Revokes a permission for a user, for an action on resource
+  Validates for the resource, action, role and permission.
+  On error throws an Exception"
+  [role-set role resource action permission]
   (valid-resource role-set resource)
   (valid-action role-set resource action)
   (valid-role role-set role)
@@ -102,7 +121,7 @@
             role-set
             acc)))
 
-(defn permit-reducer
+(defn- permit-reducer
   [role-set role permits]
   (reduce (fn [rs [resource permit]]
             (reduce (fn [acc [action permission]]
@@ -112,6 +131,8 @@
 
 
 (defn init
+  "Initialize and validates role-set from given map.
+  If anything goes wrong throws Exception"
   ([role-set]
    (init {} role-set))
   ([initial-set {:keys [resources actions roles]}]
