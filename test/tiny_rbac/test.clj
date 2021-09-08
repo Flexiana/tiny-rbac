@@ -346,10 +346,23 @@
                      (b/add-permission :poster :post :write :own)
                      (b/add-inheritance :poster :reader))]
     (is (true?
-          (c/has-permission role-set :reader :post :read)))
+          (c/has-permission role-set :reader :post :read))
+        "Have own permission")
     (is (false?
-          (c/has-permission role-set :reader :post :write)))
+          (c/has-permission role-set :reader :post :write))
+        "Doesn't have permission")
     (is (true?
-          (c/has-permission role-set :poster :post :read)))
+          (c/has-permission role-set :poster :post :read))
+        "Has inherited permission")
     (is (true?
-          (c/has-permission role-set :poster :post :write)))))
+          (c/has-permission role-set :poster :post :write))
+        "Has own permission")
+    (is (false?
+          (c/has-permission role-set :lurker :post :write))
+        "Doesn't have permission with invalid role")
+    (is (false?
+          (c/has-permission role-set :reader :comment :write))
+        "Doesn't have permission on invalid resource")
+    (is (false?
+          (c/has-permission role-set :reader :post :tag))
+        "Doesn't have permission for invalid action")))
