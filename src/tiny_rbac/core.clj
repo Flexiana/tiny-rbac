@@ -32,18 +32,28 @@
   [roleset role]
   (get (roles roleset) role))
 
-(defn accesses
+(defn permissions
+  ([roleset {:keys [role resource action]}]
+   (permissions roleset role resource action #{}))
   ([roleset role resource action]
-   (accesses roleset role resource action #{}))
+   (permissions roleset role resource action #{}))
   ([roleset role resource action acc]
    (->> (let [inherit (inherit roleset role)]
-          (cond-> (into acc (collify (get-in roleset [:roles role resource action])))
+          (cond-> (into acc (collify (get-in roleset [:roles role :permits resource action])))
                   inherit (into (mapcat identity
                                         (for [i (collify inherit)]
-                                          (accesses roleset i resource action acc))))))
+                                          (permissions roleset i resource action acc))))))
         (filter some?)
         (into #{}))))
 
-(defn access
-  [roleset role resource action access]
-  (get (accesses roleset role resource action) access))
+(defn permission
+  ([roleset {:keys [role resource action permission]}]
+   (permission roleset role resource action permission))
+  ([roleset role resource action permission]
+   (get (permissions roleset role resource action) permission)))
+
+(defn has-permission
+  ([roleset {:keys [role resource action]}]
+   (has-permission roleset role resource action))
+  ([roleset role resource action]
+   (not-empty (permissions roleset role resource action))))

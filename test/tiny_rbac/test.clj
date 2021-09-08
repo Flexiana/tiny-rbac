@@ -219,86 +219,120 @@
                             (b/add-inheritance :1 :4)))
       "indirect circular inheritance detected"))
 
-(deftest add-access
+(deftest add-permission
   (is (= #{:all}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
-             (b/add-access :poster :post :read :all)
-             (c/accesses :poster :post :read)))
-      "add single access")
+             (b/add-permission :poster :post :read :all)
+             (c/permissions :poster :post :read)))
+      "add single permission")
   (is (= #{:own :friend}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
-             (b/add-access :poster :post :read [:own :friend])
-             (c/accesses :poster :post :read)))
-      "add multiple access")
+             (b/add-permission :poster :post :read [:own :friend])
+             (c/permissions :poster :post :read)))
+      "add multiple permission")
   (is (= #{:own :friend}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
-             (b/add-access :poster :post :read :own)
-             (b/add-access :poster :post :read :friend)
-             (c/accesses :poster :post :read)))
-      "add access multiple times")
+             (b/add-permission :poster :post :read :own)
+             (b/add-permission :poster :post :read :friend)
+             (c/permissions :poster :post :read)))
+      "add permission multiple times")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred role does not exists"
                         (-> (b/add-resource {} :post)
                             (b/add-action :post [:read :write])
-                            (b/add-access :poster :post :read :all)))
+                            (b/add-permission :poster :post :read :all)))
       "Missing role")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred action does not exists"
                         (-> (b/add-resource {} :post)
                             (b/add-action :post [:write])
-                            (b/add-access :poster :post :read :all)))
+                            (b/add-permission :poster :post :read :all)))
       "Missing action")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
-                        (b/add-access {} :poster :post :read :all))
+                        (b/add-permission {} :poster :post :read :all))
       "Missing resource"))
 
-(deftest delete-access
+(deftest delete-permission
   (is (= #{:friend}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
-             (b/add-access :poster :post :read [:own :friend])
-             (b/delete-access :poster :post :read :own)
-             (c/accesses :poster :post :read)))
-      "delete single access")
+             (b/add-permission :poster :post :read [:own :friend])
+             (b/delete-permission :poster :post :read :own)
+             (c/permissions :poster :post :read)))
+      "delete single permission")
   (is (= #{}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
-             (b/add-access :poster :post :read [:own :friend])
-             (b/delete-access :poster :post :read [:own :friend])
-             (c/accesses :poster :post :read)))
-      "delete multi access")
+             (b/add-permission :poster :post :read [:own :friend])
+             (b/delete-permission :poster :post :read [:own :friend])
+             (c/permissions :poster :post :read)))
+      "delete multi permission")
   (is (thrown-with-msg? IllegalArgumentException
-                        #"referred action does not exists"
+                        #"referred permission does not exists"
                         (-> (b/add-resource {} :post)
                             (b/add-action :post [:read :write])
                             (b/add-role :poster)
-                            (b/add-access :poster :post :read :own)
-                            (b/delete-access :poster :post :read [:own :friend])))
-      "delete missing access"))
+                            (b/add-permission :poster :post :read :own)
+                            (b/delete-permission :poster :post :read [:own :friend])))
+      "delete missing permission"))
 
-(deftest access-by-inheritance
+(deftest permission-by-inheritance
   (let [roleset (-> (b/add-resource {} :post)
                     (b/add-action :post [:read :write])
                     (b/add-role :reader)
                     (b/add-role :poster)
-                    (b/add-access :reader :post :read [:own :friend])
-                    (b/add-access :poster :post :write :own)
+                    (b/add-permission :reader :post :read [:own :friend])
+                    (b/add-permission :poster :post :write :own)
                     (b/add-inheritance :poster :reader))]
     (is (= #{:own :friend}
-           (c/accesses roleset :poster :post :read)))
+           (c/permissions roleset :poster :post :read)))
     (is (= #{:own :friend}
-           (c/accesses roleset :reader :post :read)))
+           (c/permissions roleset :reader :post :read)))
     (is (= #{:own}
-           (c/accesses roleset :poster :post :write)))
+           (c/permissions roleset :poster :post :write)))
     (is (= #{}
-           (c/accesses roleset :reader :post :write)))))
+           (c/permissions roleset :reader :post :write)))))
 
+(deftest get-permission-via-map
+  (let [roleset (-> (b/add-resource {} :post)
+                    (b/add-action :post [:read :write])
+                    (b/add-role :reader)
+                    (b/add-role :poster)
+                    (b/add-permission :reader :post :read [:own :friend])
+                    (b/add-permission :poster :post :write :own)
+                    (b/add-inheritance :poster :reader))]
+    (is (= {:resources #{:post},
+            :actions   {:post #{:read :write}},
+            :roles     {:reader {:permits {:post
+                                           {:read
+                                            #{:own :friend}}}}
+                        :poster {:permits  {:post
+                                            {:write
+                                             #{:own}}}
+                                 :inherits #{:reader}}}}
+           roleset))
+    (is (= #{:own :friend}
+           (c/permissions roleset {:role  :poster
+                                   :resource :post
+                                   :action   :read})))
+    (is (= #{:own :friend}
+           (c/permissions roleset {:role  :reader
+                                   :resource :post
+                                   :action   :read})))
+    (is (= #{:own}
+           (c/permissions roleset {:role  :poster
+                                   :resource :post
+                                   :action   :write})))
+    (is (= #{}
+           (c/permissions roleset {:role  :reader
+                                   :resource :post
+                                   :action   :write})))))

@@ -28,13 +28,13 @@
   (when (some nil? (map #(c/role roleset %) (c/collify role)))
     (throw (IllegalArgumentException. "referred role does not exists"))))
 
-(defn valid-access [roleset role resource action access]
-  (let [accesses (if (= :all access)
-                   (c/accesses roleset role resource action)
-                   (c/collify access))]
-    (if (some nil? (map #(c/access roleset role resource action %) accesses))
-      (throw (IllegalArgumentException. "referred action does not exists"))
-      accesses)))
+(defn valid-permission [roleset role resource action permission]
+  (let [permissions (if (= :all permission)
+                      (c/permissions roleset role resource action)
+                      (c/collify permission))]
+    (if (some nil? (map #(c/permission roleset role resource action %) permissions))
+      (throw (IllegalArgumentException. "referred permission does not exists"))
+      permissions)))
 
 (defn valid-cyclic-inheritance
   [roleset role inherits]
@@ -85,20 +85,20 @@
   (valid-cyclic-inheritance roleset role inherits)
   (update-in roleset [:roles role :inherits] con-set (c/collify inherits)))
 
-(defn add-access
-  [roleset role resource action access]
+(defn add-permission
+  [roleset role resource action permission]
   (valid-resource roleset resource)
   (valid-action roleset resource action)
   (valid-role roleset role)
-  (update-in roleset [:roles role resource action] con-set (c/collify access)))
+  (update-in roleset [:roles role :permits resource action] con-set (c/collify permission)))
 
-(defn delete-access [roleset role resource action access]
+(defn delete-permission [roleset role resource action permission]
   (valid-resource roleset resource)
   (valid-action roleset resource action)
   (valid-role roleset role)
-  (let [acc (valid-access roleset role resource action access)]
+  (let [acc (valid-permission roleset role resource action permission)]
     (reduce (fn [rs ac]
-              (update-in rs [:roles role resource action] disj ac))
+              (update-in rs [:roles role :permits resource action] disj ac))
             roleset
             acc)))
 
