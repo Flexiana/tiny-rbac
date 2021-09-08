@@ -6,7 +6,7 @@
   [new orig]
   (into #{} (concat orig new)))
 
-(defn valid-resource
+(defn- valid-resource
   [role-set resource]
   (let [resources (if (= :all resource)
                     (c/resources role-set)
@@ -15,7 +15,7 @@
       (throw (IllegalArgumentException. "referred resource does not exists"))
       resources)))
 
-(defn valid-action
+(defn- valid-action
   [role-set resource action]
   (let [actions (if (= :all action)
                   (c/actions role-set resource)
@@ -24,11 +24,11 @@
       (throw (IllegalArgumentException. "referred action does not exists"))
       actions)))
 
-(defn valid-role [role-set role]
+(defn- valid-role [role-set role]
   (when (some nil? (map #(c/role role-set %) (c/collify role)))
     (throw (IllegalArgumentException. "referred role does not exists"))))
 
-(defn valid-permission [role-set role resource action permission]
+(defn- valid-permission [role-set role resource action permission]
   (let [permissions (if (= :all permission)
                       (c/permissions role-set role resource action)
                       (c/collify permission))]
@@ -36,7 +36,7 @@
       (throw (IllegalArgumentException. "referred permission does not exists"))
       permissions)))
 
-(defn valid-cyclic-inheritance
+(defn- valid-cyclic-inheritance
   [role-set role inherits]
   (let [inheritances (into #{} (c/collify inherits))]
     (if (inheritances role)
