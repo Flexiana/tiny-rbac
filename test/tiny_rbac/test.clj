@@ -286,30 +286,30 @@
       "delete missing permission"))
 
 (deftest permission-by-inheritance
-  (let [roleset (-> (b/add-resource {} :post)
-                    (b/add-action :post [:read :write])
-                    (b/add-role :reader)
-                    (b/add-role :poster)
-                    (b/add-permission :reader :post :read [:own :friend])
-                    (b/add-permission :poster :post :write :own)
-                    (b/add-inheritance :poster :reader))]
+  (let [role-set (-> (b/add-resource {} :post)
+                     (b/add-action :post [:read :write])
+                     (b/add-role :reader)
+                     (b/add-role :poster)
+                     (b/add-permission :reader :post :read [:own :friend])
+                     (b/add-permission :poster :post :write :own)
+                     (b/add-inheritance :poster :reader))]
     (is (= #{:own :friend}
-           (c/permissions roleset :poster :post :read)))
+           (c/permissions role-set :poster :post :read)))
     (is (= #{:own :friend}
-           (c/permissions roleset :reader :post :read)))
+           (c/permissions role-set :reader :post :read)))
     (is (= #{:own}
-           (c/permissions roleset :poster :post :write)))
+           (c/permissions role-set :poster :post :write)))
     (is (= #{}
-           (c/permissions roleset :reader :post :write)))))
+           (c/permissions role-set :reader :post :write)))))
 
 (deftest get-permission-via-map
-  (let [roleset (-> (b/add-resource {} :post)
-                    (b/add-action :post [:read :write])
-                    (b/add-role :reader)
-                    (b/add-role :poster)
-                    (b/add-permission :reader :post :read [:own :friend])
-                    (b/add-permission :poster :post :write :own)
-                    (b/add-inheritance :poster :reader))]
+  (let [role-set (-> (b/add-resource {} :post)
+                     (b/add-action :post [:read :write])
+                     (b/add-role :reader)
+                     (b/add-role :poster)
+                     (b/add-permission :reader :post :read [:own :friend])
+                     (b/add-permission :poster :post :write :own)
+                     (b/add-inheritance :poster :reader))]
     (is (= {:resources #{:post},
             :actions   {:post #{:read :write}},
             :roles     {:reader {:permits {:post
@@ -319,20 +319,37 @@
                                             {:write
                                              #{:own}}}
                                  :inherits #{:reader}}}}
-           roleset))
+           role-set))
     (is (= #{:own :friend}
-           (c/permissions roleset {:role  :poster
-                                   :resource :post
-                                   :action   :read})))
+           (c/permissions role-set {:role  :poster
+                                    :resource :post
+                                    :action   :read})))
     (is (= #{:own :friend}
-           (c/permissions roleset {:role  :reader
-                                   :resource :post
-                                   :action   :read})))
+           (c/permissions role-set {:role  :reader
+                                    :resource :post
+                                    :action   :read})))
     (is (= #{:own}
-           (c/permissions roleset {:role  :poster
-                                   :resource :post
-                                   :action   :write})))
+           (c/permissions role-set {:role  :poster
+                                    :resource :post
+                                    :action   :write})))
     (is (= #{}
-           (c/permissions roleset {:role  :reader
-                                   :resource :post
-                                   :action   :write})))))
+           (c/permissions role-set {:role  :reader
+                                    :resource :post
+                                    :action   :write})))))
+
+(deftest has-permission
+  (let [role-set (-> (b/add-resource {} :post)
+                     (b/add-action :post [:read :write])
+                     (b/add-role :reader)
+                     (b/add-role :poster)
+                     (b/add-permission :reader :post :read [:own :friend])
+                     (b/add-permission :poster :post :write :own)
+                     (b/add-inheritance :poster :reader))]
+    (is (true?
+          (c/has-permission role-set :reader :post :read)))
+    (is (false?
+          (c/has-permission role-set :reader :post :write)))
+    (is (true?
+          (c/has-permission role-set :poster :post :read)))
+    (is (true?
+          (c/has-permission role-set :poster :post :write)))))

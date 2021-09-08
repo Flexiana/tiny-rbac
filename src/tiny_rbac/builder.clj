@@ -7,98 +7,98 @@
   (into #{} (concat orig new)))
 
 (defn valid-resource
-  [roleset resource]
+  [role-set resource]
   (let [resources (if (= :all resource)
-                    (c/resources roleset)
+                    (c/resources role-set)
                     (c/collify resource))]
-    (if (some nil? (map #(c/resource roleset %) resources))
+    (if (some nil? (map #(c/resource role-set %) resources))
       (throw (IllegalArgumentException. "referred resource does not exists"))
       resources)))
 
 (defn valid-action
-  [roleset resource action]
+  [role-set resource action]
   (let [actions (if (= :all action)
-                  (c/actions roleset resource)
+                  (c/actions role-set resource)
                   (c/collify action))]
-    (if (some nil? (map #(c/action roleset resource %) actions))
+    (if (some nil? (map #(c/action role-set resource %) actions))
       (throw (IllegalArgumentException. "referred action does not exists"))
       actions)))
 
-(defn valid-role [roleset role]
-  (when (some nil? (map #(c/role roleset %) (c/collify role)))
+(defn valid-role [role-set role]
+  (when (some nil? (map #(c/role role-set %) (c/collify role)))
     (throw (IllegalArgumentException. "referred role does not exists"))))
 
-(defn valid-permission [roleset role resource action permission]
+(defn valid-permission [role-set role resource action permission]
   (let [permissions (if (= :all permission)
-                      (c/permissions roleset role resource action)
+                      (c/permissions role-set role resource action)
                       (c/collify permission))]
-    (if (some nil? (map #(c/permission roleset role resource action %) permissions))
+    (if (some nil? (map #(c/permission role-set role resource action %) permissions))
       (throw (IllegalArgumentException. "referred permission does not exists"))
       permissions)))
 
 (defn valid-cyclic-inheritance
-  [roleset role inherits]
+  [role-set role inherits]
   (let [inheritances (into #{} (c/collify inherits))]
     (if (inheritances role)
       (throw (IllegalArgumentException. (str "Circular inheritance detected for " role)))
       (doseq [i inheritances]
-        (when (c/inherit roleset i)
-          (valid-cyclic-inheritance roleset role (c/inherit roleset i)))))))
+        (when (c/inherit role-set i)
+          (valid-cyclic-inheritance role-set role (c/inherit role-set i)))))))
 
 (defn add-resource
-  [roleset resources]
-  (update roleset :resources con-set (c/collify resources)))
+  [role-set resources]
+  (update role-set :resources con-set (c/collify resources)))
 
 (defn delete-resource
-  [roleset resource]
-  (let [resources (valid-resource roleset resource)]
+  [role-set resource]
+  (let [resources (valid-resource role-set resource)]
     (reduce (fn [rs res] (-> (update rs :resources disj res)
                              (update :actions dissoc res)))
-            roleset
+            role-set
             resources)))
 
 (defn add-action
-  [roleset resource action]
-  (valid-resource roleset resource)
-  (update-in roleset [:actions resource] con-set (c/collify action)))
+  [role-set resource action]
+  (valid-resource role-set resource)
+  (update-in role-set [:actions resource] con-set (c/collify action)))
 
-(defn delete-action [roleset resource action]
-  (valid-resource roleset resource)
-  (let [actions (valid-action roleset resource action)]
+(defn delete-action [role-set resource action]
+  (valid-resource role-set resource)
+  (let [actions (valid-action role-set resource action)]
     (reduce (fn [rs ac]
               (update-in rs [:actions resource] disj ac))
-            roleset
+            role-set
             actions)))
 
 (defn add-role
-  [roleset role]
+  [role-set role]
   (reduce (fn [rs r] (if-not
                        (get-in rs [:roles r])
                        (assoc-in rs [:roles r] {})
                        rs))
-          roleset
+          role-set
           (c/collify role)))
 
 (defn add-inheritance
-  [roleset role inherits]
-  (valid-role roleset inherits)
-  (valid-cyclic-inheritance roleset role inherits)
-  (update-in roleset [:roles role :inherits] con-set (c/collify inherits)))
+  [role-set role inherits]
+  (valid-role role-set inherits)
+  (valid-cyclic-inheritance role-set role inherits)
+  (update-in role-set [:roles role :inherits] con-set (c/collify inherits)))
 
 (defn add-permission
-  [roleset role resource action permission]
-  (valid-resource roleset resource)
-  (valid-action roleset resource action)
-  (valid-role roleset role)
-  (update-in roleset [:roles role :permits resource action] con-set (c/collify permission)))
+  [role-set role resource action permission]
+  (valid-resource role-set resource)
+  (valid-action role-set resource action)
+  (valid-role role-set role)
+  (update-in role-set [:roles role :permits resource action] con-set (c/collify permission)))
 
-(defn delete-permission [roleset role resource action permission]
-  (valid-resource roleset resource)
-  (valid-action roleset resource action)
-  (valid-role roleset role)
-  (let [acc (valid-permission roleset role resource action permission)]
+(defn delete-permission [role-set role resource action permission]
+  (valid-resource role-set resource)
+  (valid-action role-set resource action)
+  (valid-role role-set role)
+  (let [acc (valid-permission role-set role resource action permission)]
     (reduce (fn [rs ac]
               (update-in rs [:roles role :permits resource action] disj ac))
-            roleset
+            role-set
             acc)))
 

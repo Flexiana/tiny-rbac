@@ -5,55 +5,55 @@
   (if (coll? x) x [x]))
 
 (defn resources
-  [roleset]
-  (:resources roleset))
+  [role-set]
+  (:resources role-set))
 
 (defn resource
-  [roleset resource]
-  (get (resources roleset) resource))
+  [role-set resource]
+  (get (resources role-set) resource))
 
 (defn actions
-  [roleset resource]
-  (get-in roleset [:actions resource]))
+  [role-set resource]
+  (get-in role-set [:actions resource]))
 
 (defn action
-  [roleset resource action]
-  (get (actions roleset resource) action))
+  [role-set resource action]
+  (get (actions role-set resource) action))
 
 (defn inherit
-  [roleset role]
-  (get-in roleset [:roles role :inherits]))
+  [role-set role]
+  (get-in role-set [:roles role :inherits]))
 
 (defn roles
-  [roleset]
-  (:roles roleset))
+  [role-set]
+  (:roles role-set))
 
 (defn role
-  [roleset role]
-  (get (roles roleset) role))
+  [role-set role]
+  (get (roles role-set) role))
 
 (defn permissions
-  ([roleset {:keys [role resource action]}]
-   (permissions roleset role resource action #{}))
-  ([roleset role resource action]
-   (permissions roleset role resource action #{}))
-  ([roleset role resource action acc]
-   (->> (let [inherit (inherit roleset role)]
-          (cond-> (into acc (collify (get-in roleset [:roles role :permits resource action])))
+  ([role-set {:keys [role resource action]}]
+   (permissions role-set role resource action #{}))
+  ([role-set role resource action]
+   (permissions role-set role resource action #{}))
+  ([role-set role resource action acc]
+   (->> (let [inherit (inherit role-set role)]
+          (cond-> (into acc (collify (get-in role-set [:roles role :permits resource action])))
                   inherit (into (mapcat identity
                                         (for [i (collify inherit)]
-                                          (permissions roleset i resource action acc))))))
+                                          (permissions role-set i resource action acc))))))
         (filter some?)
         (into #{}))))
 
 (defn permission
-  ([roleset {:keys [role resource action permission]}]
-   (permission roleset role resource action permission))
-  ([roleset role resource action permission]
-   (get (permissions roleset role resource action) permission)))
+  ([role-set {:keys [role resource action permission]}]
+   (permission role-set role resource action permission))
+  ([role-set role resource action permission]
+   (get (permissions role-set role resource action) permission)))
 
 (defn has-permission
-  ([roleset {:keys [role resource action]}]
-   (has-permission roleset role resource action))
-  ([roleset role resource action]
-   (not-empty (permissions roleset role resource action))))
+  ([role-set {:keys [role resource action]}]
+   (has-permission role-set role resource action))
+  ([role-set role resource action]
+   (not (empty? (permissions role-set role resource action)))))
