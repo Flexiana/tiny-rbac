@@ -397,11 +397,24 @@
                                          :inherits #{:reader}}}})))
         "Build from multiple maps")))
 
-(deftest delete-resource-deletes-permission
-  (is (= {:resources #{}, :actions {} :roles {:member {:permits {}}}}
+(deftest delete-resource-deletes-permissions
+  (is (= {:resources #{},
+          :actions {}
+          :roles {:member {:permits {}}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/add-role :member)
              (b/add-permission :member :comment :read :all)
              (b/delete-resource :comment)))
       "deleting resource removes permissions too"))
+
+(deftest delete-action-deletes-permissions
+  (is (= {:resources #{:comment}
+          :actions {:comment #{:tag}}
+          :roles {:guest {:permits {:comment {}}}}}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :tag])
+             (b/add-role :guest)
+             (b/add-permission :guest :comment :read :all)
+             (b/delete-action :comment :read)))
+      "deleting action removes permissions"))

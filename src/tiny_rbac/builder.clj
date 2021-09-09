@@ -55,20 +55,20 @@
   Removes all actions, and permissions on the given resource"
   [role-set resource]
   (let [resources (valid-resource role-set resource)]
-    (reduce (fn [rs res] (cond->
-                           (update rs :resources disj res)
-                           (:actions rs) (update :actions dissoc res)
-                           (:roles rs) (update :roles
-                                               (fn [role]
-                                                 (->> (map (fn [role]
-                                                             (let [[r _] role]
-                                                               (update-in
-                                                                 (apply hash-map role)
-                                                                 [r :permits]
-                                                                 dissoc
-                                                                 res)))
-                                                           role)
-                                                      (into {}))))))
+    (reduce (fn [rs res]
+              (cond->
+                (update rs :resources disj res)
+                (:actions rs) (update :actions dissoc res)
+                (:roles rs) (update :roles
+                                    (fn [role]
+                                      (->> (map (fn [role]
+                                                  (let [[r _] role]
+                                                    (update-in
+                                                      (apply hash-map role)
+                                                      [r :permits]
+                                                      dissoc res)))
+                                                role)
+                                           (into {}))))))
             role-set
             resources)))
 
@@ -79,6 +79,23 @@
   (valid-resource role-set resource)
   (update-in role-set [:actions resource] con-set (c/collify action)))
 
+(defn remove-permit-action
+  [permission resource action]
+  (let [res (key permission)
+        permit (val permission)]
+    (if (= res resource)
+      {res (dissoc permit action)}
+      permission)))
+
+(defn remove-role-permit-action
+  [permits resource action]
+  (update permits :permits #(into {} (map (fn [p] (remove-permit-action p resource action)) %))))
+
+(defn remove-roles-action
+  [roles resource action]
+  (into {} (map (fn [[role permissions]]
+                  [role (remove-role-permit-action permissions resource action)]) roles)))
+
 (defn delete-action
   "Deletes an action on resource.
   Throws Exception when the resource or the action is missing"
@@ -86,7 +103,8 @@
   (valid-resource role-set resource)
   (let [actions (valid-action role-set resource action)]
     (reduce (fn [rs ac]
-              (update-in rs [:actions resource] disj ac))
+              (cond-> (update-in rs [:actions resource] disj ac)
+                      (:roles role-set) (update :roles remove-roles-action resource ac)))
             role-set
             actions)))
 
