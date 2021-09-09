@@ -51,12 +51,24 @@
   (update role-set :resources con-set (c/collify resources)))
 
 (defn delete-resource
-  "Deletes a resource from the role-set, if it exist,
-  else throws Exception "
+  "Deletes a resource from the role-set, if it exist, else throws Exception.
+  Removes all actions, and permissions on the given resource"
   [role-set resource]
   (let [resources (valid-resource role-set resource)]
-    (reduce (fn [rs res] (-> (update rs :resources disj res)
-                             (update :actions dissoc res)))
+    (reduce (fn [rs res] (cond->
+                           (update rs :resources disj res)
+                           (:actions rs) (update :actions dissoc res)
+                           (:roles rs) (update :roles
+                                               (fn [role]
+                                                 (->> (map (fn [role]
+                                                             (let [[r _] role]
+                                                               (update-in
+                                                                 (apply hash-map role)
+                                                                 [r :permits]
+                                                                 dissoc
+                                                                 res)))
+                                                           role)
+                                                      (into {}))))))
             role-set
             resources)))
 
