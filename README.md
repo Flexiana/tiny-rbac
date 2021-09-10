@@ -4,16 +4,13 @@
 
 ## Table of Contents
 * [General Info](#general-information)
-* [Technologies Used](#technologies-used)
 * [Features](#features)
-* [Screenshots](#screenshots)
 * [Setup](#setup)
 * [Usage](#usage)
 * [Project Status](#project-status)
 * [Room for Improvement](#room-for-improvement)
 * [Acknowledgements](#acknowledgements)
 * [Contact](#contact)
-<!-- * [License](#license) -->
 
 
 ## General Information
@@ -232,7 +229,7 @@ results in role-set without resources, actions, or any permissions
 
 ## Project Status
 - _almost complete_; 
-- see [TODOs](####Tightening-the-role-set)
+- see [TODOs](#Tightening-the-role-set)
 
 ## Room for Improvement
 
