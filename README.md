@@ -104,9 +104,11 @@ With the core you can query for
 ```
 
 ## Setup 
-### TODO
 Add 
-> [clojars link and version] 
+
+```clojure
+[clojars link and version]                  ;;TODO
+```
 
 to dependencies
 
@@ -114,7 +116,7 @@ to dependencies
 
 ### Builder
 
-#### Creating a role-set
+#### Creating a role-set via functions
 
 ```clojure
 (:require 
@@ -167,7 +169,7 @@ to dependencies
       (b/add-inheritance :poster :reader)))
 ```
 
-Every `add-*` functions are supporting bulk and single addition. 
+Every `add-*` functions are supporting bulk and single addition.
 
 ```clojure
 (is (= (-> ... 
@@ -175,6 +177,13 @@ Every `add-*` functions are supporting bulk and single addition.
            (b/add-action .. :write))
        (b/add-action ... ... [:read :write])))
 ```
+
+#### Creating a role-set from maps
+
+Maps can be also used to create role-set. It's highly advised to use `init` function to **convert / validate** a pure 
+clojure map to role-set. 
+
+> See [Features](#builder) for details.
 
 #### Tightening the role-set
 
@@ -211,7 +220,7 @@ Every `add-*` functions are supporting bulk and single addition.
 (b/delete-permission role-set :role :resource :action [:permission-1 :permission-2])
 ```
 
-Calling `delete-*` functions with `::b/all` removes all referred instance. Like:
+Calling `delete-*` functions with `::b/all` removes all referred instances. Like:
 ```clojure
 (delete-resource role-set :b/all)
 ```
@@ -219,16 +228,19 @@ results in role-set without resources, actions, or any permissions
 
 
 ### Core
+
+The core functions are for resolving resources, actions, roles and permissions from already built role-set.
+These functions are not providing any validations, all validations are done in the build steps.
+When a set is missing from role-set, functions are returning empty sets.
 ```clojure
 (:require 
-  [tiny-rbac.builder :as b]
   [tiny-rbac.core :as c])
 ```
 
 
 
 ## Project Status
-- _almost complete_; 
+- _almost complete_
 - see [TODOs](#Tightening-the-role-set)
 
 ## Room for Improvement
@@ -241,7 +253,7 @@ results in role-set without resources, actions, or any permissions
 
 
 ## Acknowledgements
-> - Many thanks to [Flexiana](https://flexiana.com/) for all the support.
+> Many thanks to [Flexiana](https://flexiana.com/) for all the support.
 
 
 ## Contact
