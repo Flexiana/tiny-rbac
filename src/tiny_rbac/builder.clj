@@ -176,6 +176,3 @@
                                      permits (permit-reducer role permits)
                                      inherits (add-inheritance role inherits)))
                            % roles)))))
-
-
-
