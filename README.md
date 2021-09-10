@@ -1,6 +1,6 @@
 # Tiny RBAC
 
-> Small library for role based access control for clojure
+> Small role based access control library for clojure
 
 ## Table of Contents
 
