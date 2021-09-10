@@ -53,7 +53,7 @@
       "can delete multiple resources by name")
   (is (= #{}
          (-> (b/add-resource {} [:post :tag])
-             (b/delete-resource :all)
+             (b/delete-resource ::b/all)
              (c/resources)))
       "can delete all resources")
   (is (thrown-with-msg? IllegalArgumentException
@@ -108,7 +108,7 @@
          (-> (b/add-resource {} [:comment :post])
              (b/add-action :comment :read)
              (b/add-action :post :read)
-             (b/delete-resource :all)))
+             (b/delete-resource ::b/all)))
       "deleting resources removes actions too"))
 
 (deftest delete-action
@@ -136,7 +136,7 @@
   (is (= #{}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :write :tag])
-             (b/delete-action :comment :all)
+             (b/delete-action :comment ::b/all)
              (c/actions :comment)))
       "deleting all actions"))
 
@@ -220,11 +220,11 @@
       "indirect circular inheritance detected"))
 
 (deftest add-permission
-  (is (= #{:all}
+  (is (= #{::b/all}
          (-> (b/add-resource {} :post)
              (b/add-action :post [:read :write])
              (b/add-role :poster)
-             (b/add-permission :poster :post :read :all)
+             (b/add-permission :poster :post :read ::b/all)
              (c/permissions :poster :post :read)))
       "add single permission")
   (is (= #{:own :friend}
@@ -246,17 +246,17 @@
                         #"referred role does not exists"
                         (-> (b/add-resource {} :post)
                             (b/add-action :post [:read :write])
-                            (b/add-permission :poster :post :read :all)))
+                            (b/add-permission :poster :post :read ::b/all)))
       "Missing role")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred action does not exists"
                         (-> (b/add-resource {} :post)
                             (b/add-action :post [:write])
-                            (b/add-permission :poster :post :read :all)))
+                            (b/add-permission :poster :post :read ::b/all)))
       "Missing action")
   (is (thrown-with-msg? IllegalArgumentException
                         #"referred resource does not exists"
-                        (b/add-permission {} :poster :post :read :all))
+                        (b/add-permission {} :poster :post :read ::b/all))
       "Missing resource"))
 
 (deftest delete-permission
@@ -404,7 +404,7 @@
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/add-role :member)
-             (b/add-permission :member :comment :read :all)
+             (b/add-permission :member :comment :read ::b/all)
              (b/delete-resource :comment)))
       "deleting resource removes permissions too"))
 
@@ -415,6 +415,6 @@
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)
-             (b/add-permission :guest :comment :read :all)
+             (b/add-permission :guest :comment :read ::b/all)
              (b/delete-action :comment :read)))
       "deleting action removes permissions"))

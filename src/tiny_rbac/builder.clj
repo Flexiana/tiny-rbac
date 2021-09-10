@@ -8,7 +8,7 @@
 
 (defn- valid-resource
   [role-set resource]
-  (let [resources (if (= :all resource)
+  (let [resources (if (= ::all resource)
                     (c/resources role-set)
                     (c/collify resource))]
     (if (some nil? (map #(c/resource role-set %) resources))
@@ -17,7 +17,7 @@
 
 (defn- valid-action
   [role-set resource action]
-  (let [actions (if (= :all action)
+  (let [actions (if (= ::all action)
                   (c/actions role-set resource)
                   (c/collify action))]
     (if (some nil? (map #(c/action role-set resource %) actions))
@@ -29,7 +29,7 @@
     (throw (IllegalArgumentException. "referred role does not exists"))))
 
 (defn- valid-permission [role-set role resource action permission]
-  (let [permissions (if (= :all permission)
+  (let [permissions (if (= ::all permission)
                       (c/permissions role-set role resource action)
                       (c/collify permission))]
     (if (some nil? (map #(c/permission role-set role resource action %) permissions))
