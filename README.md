@@ -24,7 +24,7 @@ The library has two components
 ## Features
 ### Builder
 
-With the builder you can define role set from
+With the builder you can define role set via
 
 - single map
 ```clojure
@@ -52,6 +52,8 @@ With the builder you can define role set from
     (b/add-permission :poster :post :write :own)
     (b/add-inheritance :poster :reader))
 ```
+
+All examples above providing the same result.
 
 ### Core
 
@@ -99,9 +101,10 @@ With the core you can query for
 
 (is (= true?
        (c/has-permission {...} :poster :post :write)))
+
+(is (= false?
+       (c/has-permission {...} :reader :post :write)))
 ```
-
-
 
 ## Setup 
 ### TODO
@@ -113,10 +116,12 @@ to dependencies
 ## Usage
 
 ### Builder
+
+#### Creating a role-set
+
 ```clojure
 (:require 
-  [tiny-rbac.builder :as b]
-  [tiny-rbac.core :as c])
+  [tiny-rbac.builder :as b])
 
 (def role-set
   (->
@@ -141,7 +146,8 @@ to dependencies
       (b/add-role :poster)
       
       ;; creates :admin role which inherits its roles from :poster
-      ;; Throws an exception if inherited role doesn't exists
+      ;; Throws an exception if inherited role doesn't exists,
+      ;; or in case of cyclic inheritance
       (b/add-inheritance :admin :poster)
       
       ;; Provides permission for :reader role, to :read :own and :friend's :posts
@@ -159,9 +165,61 @@ to dependencies
       (b/add-permission :poster :post :write :own)
       
       ;; Adds :reader as inheritance to :poster
-      ;; Throws an exception if inherited :reader role doesn't exists
+      ;; Throws an exception if inherited :reader role doesn't exists,
+      ;; or in case of cyclic inheritance
       (b/add-inheritance :poster :reader)))
 ```
+
+Every `add-*` functions are supporting bulk and single addition. 
+
+```clojure
+(is (= (-> ... 
+           (b/add-action ... :read)
+           (b/add-action .. :write))
+       (b/add-action ... ... [:read :write])))
+```
+
+#### Tightening the role-set
+
+```clojure
+(:require
+  [tiny-rbac.builder :as b])
+
+(def role-set ...)
+
+;; Remove resource(s), with all referring actions and permissions from role-set
+;; Throws an Exception if the resource does not exists 
+(b/delete-resource role-set :comment)
+(b/delete-resource role-set [:post :comment])
+
+;; Remove action(s) from role-set's resource, with all permissions on it
+;; Throws an Exception if the resource or the action does not exists 
+(b/delete-action role-set :resource :comment)
+(b/delete-action role-set :resource [:post :comment])
+
+;; Deleting role(s)
+;; Removes role(s) from all inheritances
+;; Throws an Exception if the role is missing
+(b/delete-role role-set :lurker)                                 ;;TODO
+(b/delete-role role-set [:guest :lurker])                        ;;TODO
+
+;; Removing inheritance(s) from role
+;; Throws an Exception if the role not inherited from given one
+(b/delete-inheritance role-set :admin :lurker)                   ;;TODO
+(b/delete-inheritance role-set :admin [:guest :lurker])          ;;TODO
+
+;; Revoking permission(s) from role
+;; Throws an Exception if resource, action, role or permission is missing
+(b/delete-permission role-set :role :resource :action :permission)
+(b/delete-permission role-set :role :resource :action [:permission-1 :permission-2])
+```
+
+Calling `delete-*` functions with `::b/all` removes all referred instance. Like:
+```clojure
+(delete-resource role-set :b/all)
+```
+results in role-set without resources, actions, or any permissions
+
 
 ### Core
 ```clojure
@@ -173,12 +231,14 @@ to dependencies
 
 
 ## Project Status
-> _complete_  
+- _almost complete_; 
+- see [TODOs](####Tightening-the-role-set)
 
 ## Room for Improvement
 
 > To do:
 >
+> - Implement missing deletion commands
 > - Release to clojars 
 > - Examples and use cases would be nice to provide
 
