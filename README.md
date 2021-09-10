@@ -24,7 +24,7 @@ The library has two components
 ## Features
 ### Builder
 
-With the builder you can define role set with
+With the builder you can define role set from
 
 - single map
 ```clojure
@@ -112,11 +112,65 @@ to dependencies
 
 ## Usage
 
+### Builder
+```clojure
+(:require 
+  [tiny-rbac.builder :as b]
+  [tiny-rbac.core :as c])
+
+(def role-set
+  (->
+      ;; empty role-set
+      {}
+      
+      ;; defining a new resource in the given role-set
+      (b/add-resource :post)
+      
+      ;; defining actions for a resource
+      ;; Throws an exception if the given resource not defined
+      (b/add-action :post [:read :write])
+      
+      ;; add an action to the resource
+      ;; Throws an exception if the given resource not defined
+      (b/add-action :post :tag)
+      
+      ;; defines roles int the given role-set
+      (b/add-role [:reader :guest])
+      
+      ;; adds role to the given role-set
+      (b/add-role :poster)
+      
+      ;; creates :admin role which inherits its roles from :poster
+      ;; Throws an exception if inherited role doesn't exists
+      (b/add-inheritance :admin :poster)
+      
+      ;; Provides permission for :reader role, to :read :own and :friend's :posts
+      ;; Throws an exception if
+      ;;  :post resource not defined 
+      ;;  :post resource has no :read action
+      ;;  :reader role doesn't exists 
+      (b/add-permission :reader :post :read [:own :friend])
+
+      ;; Provides permission for :poster role, to :write :own :posts
+      ;; Throws an exception if
+      ;;  :post resource not defined 
+      ;;  :post resource has no :write action
+      ;;  :poster role doesn't exists 
+      (b/add-permission :poster :post :write :own)
+      
+      ;; Adds :reader as inheritance to :poster
+      ;; Throws an exception if inherited :reader role doesn't exists
+      (b/add-inheritance :poster :reader)))
+```
+
+### Core
 ```clojure
 (:require 
   [tiny-rbac.builder :as b]
   [tiny-rbac.core :as c])
 ```
+
+
 
 ## Project Status
 > _complete_  
