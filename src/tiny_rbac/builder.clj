@@ -178,13 +178,19 @@
                                      permits (permit-reducer role permits)))
                            % roles))
            inherits (#(reduce (fn [rs [role i]]
-                                  (add-inheritance rs role i))
+                                (add-inheritance rs role i))
                               % inherits)))))
+
+(defn remove-roles-inheritance
+  [inheritances role]
+  (into {}
+        (map (fn [[role-name inherit]]
+               {role-name (disj inherit role)}) inheritances)))
 
 (defn delete-role [role-set role]
   (let [roles (valid-role role-set role)]
-    (println roles)
     (reduce (fn [rs r]
-              (update rs :roles dissoc r))
+              (cond-> (update rs :roles dissoc r)
+                      (:inherits rs) (update :inherits remove-roles-inheritance r)))
             role-set roles)))
 

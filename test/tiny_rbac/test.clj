@@ -420,10 +420,21 @@
       "deleting action removes permissions"))
 
 (deftest delete-role
-  (is (= {}
+  (is (= {:resources #{:comment}
+          :actions   {:comment #{:read :tag}}
+          :roles     {}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)
-             (b/delete-role :guest)
-             (c/roles)))
-      "deleting role removes it from role-set"))
+             (b/delete-role :guest)))
+      "deleting role removes it from role-set")
+  (is (= {:resources #{:comment}
+          :actions   {:comment #{:read :tag}}
+          :inherits  {:admin #{}}
+          :roles     {:admin {}}}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :tag])
+             (b/add-role :guest)
+             (b/add-inheritance :admin :guest)
+             (b/delete-role :guest)))
+      "deleting role removes it from inherits"))

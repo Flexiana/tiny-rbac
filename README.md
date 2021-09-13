@@ -229,8 +229,8 @@ clojure map to role-set.
 ;; Deleting role(s)
 ;; Removes role(s) from all inheritances
 ;; Throws an Exception if the role is missing
-(b/delete-role role-set :lurker)                                 ;;TODO
-(b/delete-role role-set [:guest :lurker])                        ;;TODO
+(b/delete-role role-set :lurker)
+(b/delete-role role-set [:guest :lurker])
 
 ;; Removing inheritance(s) from role
 ;; Throws an Exception if the role not inherited from given one
