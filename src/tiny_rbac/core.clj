@@ -7,7 +7,7 @@
 (defn resources
   "Get all resources from the role-set"
   [role-set]
-  (:resources role-set #{}))
+  (::resources role-set #{}))
 
 (defn resource
   "Get given resource from the role-set"
@@ -17,7 +17,7 @@
 (defn actions
   "Get all actions for given resource"
   [role-set resource]
-  (get-in role-set [:actions resource] #{}))
+  (get-in role-set [::actions resource] #{}))
 
 (defn action
   "Get given action for resource"
@@ -27,12 +27,12 @@
 (defn inherit
   "Get role parents"
   [role-set role]
-  (get-in role-set [:inherits role] #{}))
+  (get-in role-set [::inherits role] #{}))
 
 (defn roles
   "Get all roles from the role-set"
   [role-set]
-  (:roles role-set #{}))
+  (::roles role-set #{}))
 
 (defn role
   "Get given role from the role-set"
@@ -47,7 +47,7 @@
    (permissions role-set role resource action #{}))
   ([role-set role resource action acc]
    (->> (let [inherit (inherit role-set role)]
-          (cond-> (into acc (collify (get-in role-set [:roles role resource action])))
+          (cond-> (into acc (collify (get-in role-set [::roles role resource action])))
                   inherit (into (mapcat identity
                                         (for [i (collify inherit)]
                                           (permissions role-set i resource action acc))))))

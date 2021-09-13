@@ -25,21 +25,21 @@ With the builder you can define role set via
 - single map
 
 ```clojure
-(b/init {:resources :post
-         :actions   {:post [:read :write]}
-         :inherits  {:poster :reader}
-         :roles     {:reader {:post {:read [:own :friend]}}
-                     :poster {:post {:write :own}}}})
+(b/init {:tiny-rbac.core/resources :post
+         :tiny-rbac.core/actions   {:post [:read :write]}
+         :tiny-rbac.core/inherits  {:poster :reader}
+         :tiny-rbac.core/roles     {:reader {:post {:read [:own :friend]}}
+                                    :poster {:post {:write :own}}}})
 ```
 
 - multiple maps
 
 ```clojure
-(-> (b/init {:resources :post})
-    (b/init {:actions {:post [:read :write]}})
-    (b/init {:roles {:reader {:post {:read #{:own :friend}}}}})
-    (b/init {:roles {:poster {:post {:write #{:own}}}}})
-    (b/init {:inherits {:poster :reader}}))
+(-> (b/init {:tiny-rbac.core/resources :post})
+    (b/init {:tiny-rbac.core/actions {:post [:read :write]}})
+    (b/init {:tiny-rbac.core/roles {:reader {:post {:read #{:own :friend}}}}})
+    (b/init {:tiny-rbac.core/roles {:poster {:post {:write #{:own}}}}})
+    (b/init {:tiny-rbac.core/inherits {:poster :reader}}))
 ```
 
 - code
@@ -58,11 +58,11 @@ All examples above providing the same result:
 
 ```clojure
 (def role-set
-  {:resources #{:post},
-   :actions   {:post #{:read :write}},
-   :inherits  {:poster #{:reader}}
-   :roles     {:reader {:post {:read #{:own :friend}}}
-               :poster {:post {:write #{:own}}}}})
+  {:tiny-rbac.core/resources #{:post},
+   :tiny-rbac.core/actions   {:post #{:read :write}},
+   :tiny-rbac.core/inherits  {:poster #{:reader}}
+   :tiny-rbac.core/roles     {:reader {:post {:read #{:own :friend}}}
+                              :poster {:post {:write #{:own}}}}})
 ```
 
 ### Core
@@ -265,11 +265,11 @@ role-set, functions are returning empty sets.
   [tiny-rbac.core :as c])
 
 (def role-set
-  {:resources #{:post},
-   :actions   {:post #{:read :write}},
-   :inherits  {:poster #{:reader}}
-   :roles     {:reader {:post {:read #{:own :friend}}}
-               :poster {:post {:write #{:own}}}}})
+  {:tiny-rbac.core/resources #{:post},
+   :tiny-rbac.core/actions   {:post #{:read :write}},
+   :tiny-rbac.core/inherits  {:poster #{:reader}}
+   :tiny-rbac.core/roles     {:reader {:post {:read #{:own :friend}}}
+                              :poster {:post {:write #{:own}}}}})
 
 ;; Get all resources from role-set
 (is (= #{:post}
@@ -296,11 +296,11 @@ role-set, functions are returning empty sets.
   [tiny-rbac.core :as c])
 
 (def role-set
-  {:resources #{:post},
-   :actions   {:post #{:read :write}},
-   :inherits  {:poster #{:reader}}
-   :roles     {:reader {:post {:read #{:own :friend}}}
-               :poster {:post {:write #{:own}}}}})
+  {:tiny-rbac.core/resources #{:post},
+   :tiny-rbac.core/actions   {:post #{:read :write}},
+   :tiny-rbac.core/inherits  {:poster #{:reader}}
+   :tiny-rbac.core/roles     {:reader {:post {:read #{:own :friend}}}
+                              :poster {:post {:write #{:own}}}}})
 
 ;; Get all actions for resource from role-set
 (is (= #{:read :write}
@@ -331,17 +331,16 @@ role-set, functions are returning empty sets.
   [tiny-rbac.core :as c])
 
 (def role-set
-  {:resources #{:post},
-   :actions   {:post #{:read :write}},
-   :inherits  {:poster #{:reader}}
-   :roles     {:reader {:post {:read #{:own :friend}}}
-               :poster {:post {:write #{:own}}}}})
+  {:tiny-rbac.core/resources #{:post},
+   :tiny-rbac.core/actions   {:post #{:read :write}},
+   :tiny-rbac.core/inherits  {:poster #{:reader}}
+   :tiny-rbac.core/roles     {:reader {:post {:read #{:own :friend}}}
+                              :poster {:post {:write #{:own}}}}})
 
 ;; Get all roles from role-set
 (is (= {:guest  {}
-        :reader {:permits {:post {:read #{:own :friend}}}}
-        :poster {:permits  {:post {:write #{:own}}}
-                 :inherits #{:reader}}}
+        :reader {:post {:read #{:own :friend}}}
+        :poster {:post {:write #{:own}}}}
        (c/roles role-set)))
 
 ;; Returns empty set when role-set has no roles
@@ -365,11 +364,11 @@ role-set, functions are returning empty sets.
   [tiny-rbac.core :as c])
 
 (def role-set
-  {:resources #{:post},
-   :actions   {:post #{:read :write}},
-   :inherits  {:poster #{:reader}}
-   :roles     {:reader {:post {:read #{:own :friend}}}
-               :poster {:post {:write #{:own}}}}})
+  {:tiny-rbac.core/resources #{:post},
+   :tiny-rbac.core/actions   {:post #{:read :write}},
+   :tiny-rbac.core/inherits  {:poster #{:reader}}
+   :tiny-rbac.core/roles     {:reader {:post {:read #{:own :friend}}}
+                              :poster {:post {:write #{:own}}}}})
 
 ;; Get all permissions for resource and action
 (is (= #{:own :friend}
@@ -402,13 +401,12 @@ role-set, functions are returning empty sets.
 
 ## Project Status
 
-- _almost complete_
+- _complete_
 
 ## Room for Improvement
 
 > To do:
 >
-> - Implement missing deletion commands
 > - Release to clojars
 > - Examples and use cases would be nice to provide
 

@@ -61,7 +61,7 @@
 (defn add-resource
   "Defines a new resource to the role-set"
   [role-set resources]
-  (update role-set :resources con-set (c/collify resources)))
+  (update role-set ::c/resources con-set (c/collify resources)))
 
 (defn delete-resource
   "Deletes a resource from the role-set, if it exist, else throws Exception.
@@ -70,15 +70,15 @@
   (let [resources (valid-resource role-set resource)]
     (reduce (fn [rs res]
               (cond->
-                (update rs :resources disj res)
-                (:actions rs) (update :actions dissoc res)
-                (:roles rs) (update :roles
-                                    (fn [role]
-                                      (->> (map (fn [role]
-                                                  (let [[r _] role]
-                                                    (update (apply hash-map role) r dissoc res)))
-                                                role)
-                                           (into {}))))))
+                (update rs ::c/resources disj res)
+                (::c/actions rs) (update ::c/actions dissoc res)
+                (::c/roles rs) (update ::c/roles
+                                       (fn [role]
+                                         (->> (map (fn [role]
+                                                     (let [[r _] role]
+                                                       (update (apply hash-map role) r dissoc res)))
+                                                   role)
+                                              (into {}))))))
             role-set
             resources)))
 
@@ -87,7 +87,7 @@
   Throws exception when the resource is missing "
   [role-set resource action]
   (valid-resource role-set resource)
-  (update-in role-set [:actions resource] con-set (c/collify action)))
+  (update-in role-set [::c/actions resource] con-set (c/collify action)))
 
 (defn remove-permit-action
   [permission resource action]
@@ -113,8 +113,8 @@
   (valid-resource role-set resource)
   (let [actions (valid-action role-set resource action)]
     (reduce (fn [rs ac]
-              (cond-> (update-in rs [:actions resource] disj ac)
-                      (:roles role-set) (update :roles remove-roles-action resource ac)))
+              (cond-> (update-in rs [::c/actions resource] disj ac)
+                      (::c/roles role-set) (update ::c/roles remove-roles-action resource ac)))
             role-set
             actions)))
 
@@ -122,8 +122,8 @@
   "Defines a new role to the role-set"
   [role-set role]
   (reduce (fn [rs r] (if-not
-                       (get-in rs [:roles r])
-                       (assoc-in rs [:roles r] {})
+                       (get-in rs [::c/roles r])
+                       (assoc-in rs [::c/roles r] {})
                        rs))
           role-set
           (c/collify role)))
@@ -135,7 +135,7 @@
   [role-set role inherits]
   (valid-role role-set inherits)
   (valid-cyclic-inheritance role-set role inherits)
-  (-> (update-in role-set [:inherits role] con-set (c/collify inherits))
+  (-> (update-in role-set [::c/inherits role] con-set (c/collify inherits))
       (add-role role)))
 
 (defn add-permission
@@ -146,7 +146,7 @@
   (valid-resource role-set resource)
   (valid-action role-set resource action)
   (valid-role role-set role)
-  (update-in role-set [:roles role resource action] con-set (c/collify permission)))
+  (update-in role-set [::c/roles role resource action] con-set (c/collify permission)))
 
 (defn delete-permission
   "Revokes a permission for a user, for an action on resource
@@ -158,7 +158,7 @@
   (valid-role role-set role)
   (let [acc (valid-permission role-set role resource action permission)]
     (reduce (fn [rs ac]
-              (update-in rs [:roles role resource action] disj ac))
+              (update-in rs [::c/roles role resource action] disj ac))
             role-set
             acc)))
 
@@ -176,7 +176,7 @@
   If anything goes wrong throws Exception"
   ([role-set]
    (init {} role-set))
-  ([initial-set {:keys [resources actions roles inherits]}]
+  ([initial-set {:keys [::c/resources ::c/actions ::c/roles ::c/inherits]}]
    (cond-> initial-set
            resources (add-resource resources)
            actions (#(reduce (fn [acc [resource action]]
@@ -199,15 +199,15 @@
 (defn delete-role [role-set role]
   (let [roles (valid-role role-set role)]
     (reduce (fn [rs r]
-              (cond-> (update rs :roles dissoc r)
-                      (:inherits rs) (update :inherits remove-roles-inheritance r)))
+              (cond-> (update rs ::c/roles dissoc r)
+                      (::c/inherits rs) (update ::c/inherits remove-roles-inheritance r)))
             role-set roles)))
 
 (defn delete-inheritance
   [role-set role inheritance]
   (let [inheritances (valid-inheritance role-set role inheritance)]
     (reduce (fn [rs i]
-              (update-in rs [:inherits role] disj i))
+              (update-in rs [::c/inherits role] disj i))
             role-set inheritances)))
 
 

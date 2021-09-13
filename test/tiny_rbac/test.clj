@@ -99,12 +99,12 @@
       "Throws an Exception when resource not available"))
 
 (deftest delete-resource-deletes-actions
-  (is (= {:resources #{}, :actions {}}
+  (is (= {::c/resources #{}, ::c/actions {}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/delete-resource :comment)))
       "deleting resources removes actions too")
-  (is (= {:resources #{}, :actions {}}
+  (is (= {::c/resources #{}, ::c/actions {}}
          (-> (b/add-resource {} [:comment :post])
              (b/add-action :comment :read)
              (b/add-action :post :read)
@@ -141,10 +141,10 @@
       "deleting all actions"))
 
 (deftest add-role
-  (is (= {:roles {:poster {}}}
+  (is (= {::c/roles {:poster {}}}
          (b/add-role {} :poster)))
-  (is (= {:roles {:poster {}
-                  :admin  {}}}
+  (is (= {::c/roles {:poster {}
+                     :admin     {}}}
          (b/add-role {} [:poster :admin]))))
 
 (deftest add-inheritance
@@ -310,15 +310,15 @@
                      (b/add-permission :reader :post :read [:own :friend])
                      (b/add-permission :poster :post :write :own)
                      (b/add-inheritance :poster :reader))]
-    (is (= {:resources #{:post},
-            :actions   {:post #{:read :write}},
-            :inherits  {:poster #{:reader}}
-            :roles     {:reader {:post
-                                 {:read
-                                  #{:own :friend}}}
-                        :poster {:post
-                                 {:write
-                                  #{:own}}}}}
+    (is (= {::c/resources #{:post},
+            ::c/actions   {:post #{:read :write}},
+            ::c/inherits  {:poster #{:reader}}
+            ::c/roles     {:reader {:post
+                                    {:read
+                                     #{:own :friend}}}
+                           :poster {:post
+                                    {:write
+                                     #{:own}}}}}
            role-set))
     (is (= #{:own :friend}
            (c/permissions role-set {:role     :poster
@@ -368,11 +368,11 @@
         "Doesn't have permission for invalid action")))
 
 (deftest building-role-set
-  (let [expected {:resources #{:post},
-                  :actions   {:post #{:read :write}},
-                  :inherits  {:poster #{:reader}}
-                  :roles     {:reader {:post {:read #{:own :friend}}}
-                              :poster {:post {:write #{:own}}}}}]
+  (let [expected {::c/resources #{:post},
+                  ::c/actions   {:post #{:read :write}},
+                  ::c/inherits  {:poster #{:reader}}
+                  ::c/roles     {:reader {:post {:read #{:own :friend}}}
+                                 :poster {:post {:write #{:own}}}}}]
     (is (= expected
            (-> (b/add-resource {} :post)
                (b/add-action :post [:read :write])
@@ -383,24 +383,24 @@
                (b/add-inheritance :poster :reader)))
         "Build by code")
     (is (= expected
-           (b/init {:resources :post
-                    :actions   {:post [:read :write]}
-                    :inherits  {:poster :reader}
-                    :roles     {:reader {:post {:read [:own :friend]}}
-                                :poster {:post {:write :own}}}}))
+           (b/init {::c/resources :post
+                    ::c/actions   {:post [:read :write]}
+                    ::c/inherits  {:poster :reader}
+                    ::c/roles     {:reader {:post {:read [:own :friend]}}
+                                   :poster {:post {:write :own}}}}))
         "Build from one map")
     (is (= expected
-           (-> (b/init {:resources :post})
-               (b/init {:actions {:post [:read :write]}})
-               (b/init {:roles {:reader {:post {:read #{:own :friend}}}}})
-               (b/init {:roles {:poster {:post {:write #{:own}}}}})
-               (b/init {:inherits {:poster :reader}})))
+           (-> (b/init {::c/resources :post})
+               (b/init {::c/actions {:post [:read :write]}})
+               (b/init {::c/roles {:reader {:post {:read #{:own :friend}}}}})
+               (b/init {::c/roles {:poster {:post {:write #{:own}}}}})
+               (b/init {::c/inherits {:poster :reader}})))
         "Build from multiple maps")))
 
 (deftest delete-resource-deletes-permissions
-  (is (= {:resources #{},
-          :actions   {}
-          :roles     {:member {}}}
+  (is (= {::c/resources #{},
+          ::c/actions   {}
+          ::c/roles     {:member {}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/add-role :member)
@@ -409,9 +409,9 @@
       "deleting resource removes permissions too"))
 
 (deftest delete-action-deletes-permissions
-  (is (= {:resources #{:comment}
-          :actions   {:comment #{:tag}}
-          :roles     {:guest {:comment {}}}}
+  (is (= {::c/resources #{:comment}
+          ::c/actions   {:comment #{:tag}}
+          ::c/roles     {:guest {:comment {}}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)
@@ -420,18 +420,18 @@
       "deleting action removes permissions"))
 
 (deftest delete-role
-  (is (= {:resources #{:comment}
-          :actions   {:comment #{:read :tag}}
-          :roles     {}}
+  (is (= {::c/resources #{:comment}
+          ::c/actions   {:comment #{:read :tag}}
+          ::c/roles     {}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)
              (b/delete-role :guest)))
       "deleting role removes it from role-set")
-  (is (= {:resources #{:comment}
-          :actions   {:comment #{:read :tag}}
-          :inherits  {:admin #{}}
-          :roles     {:admin {}}}
+  (is (= {::c/resources #{:comment}
+          ::c/actions   {:comment #{:read :tag}}
+          ::c/inherits  {:admin #{}}
+          ::c/roles     {:admin {}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)
@@ -440,10 +440,10 @@
       "deleting role removes it from inherits"))
 
 (deftest delete-inheritance
-  (is (= {:resources #{:comment}
-          :actions   {:comment #{:read :tag}}
-          :roles     {:guest {} :guest2 {} :admin {}}
-          :inherits  {:admin #{:guest2}}}
+  (is (= {::c/resources #{:comment}
+          ::c/actions   {:comment #{:read :tag}}
+          ::c/roles     {:guest {} :guest2 {} :admin {}}
+          ::c/inherits  {:admin #{:guest2}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role [:guest :guest2])
