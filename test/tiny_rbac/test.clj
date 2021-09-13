@@ -438,3 +438,15 @@
              (b/add-inheritance :admin :guest)
              (b/delete-role :guest)))
       "deleting role removes it from inherits"))
+
+(deftest delete-inheritance
+  (is (= {:resources #{:comment}
+          :actions   {:comment #{:read :tag}}
+          :roles     {:guest {} :guest2 {} :admin {}}
+          :inherits  {:admin #{:guest2}}}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :tag])
+             (b/add-role [:guest :guest2])
+             (b/add-inheritance :admin [:guest :guest2])
+             (b/delete-inheritance :admin :guest)))
+      "deleting inheritance removes it"))

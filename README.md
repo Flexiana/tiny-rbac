@@ -234,8 +234,8 @@ clojure map to role-set.
 
 ;; Removing inheritance(s) from role
 ;; Throws an Exception if the role not inherited from given one
-(b/delete-inheritance role-set :admin :lurker)                   ;;TODO
-(b/delete-inheritance role-set :admin [:guest :lurker])          ;;TODO
+(b/delete-inheritance role-set :admin :lurker)
+(b/delete-inheritance role-set :admin [:guest :lurker])
 
 ;; Revoking permission(s) from role
 ;; Throws an Exception if resource, action, role or permission is missing
@@ -403,7 +403,6 @@ role-set, functions are returning empty sets.
 ## Project Status
 
 - _almost complete_
-- see [TODOs](#Tightening-the-role-set)
 
 ## Room for Improvement
 

@@ -32,6 +32,15 @@
       (throw (IllegalArgumentException. "referred role does not exists"))
       roles)))
 
+(defn valid-inheritance [role-set role inheritance]
+  (let [inheritances (if (= ::all inheritance)
+                       (c/inherit role-set role)
+                       (c/collify inheritance))]
+    (if (some nil? (map #(c/inherit role-set %) inheritances))
+      (throw (IllegalArgumentException. "referred inheritance does not exists"))
+      inheritances)))
+
+
 (defn- valid-permission [role-set role resource action permission]
   (let [permissions (if (= ::all permission)
                       (c/permissions role-set role resource action)
@@ -181,7 +190,7 @@
                                 (add-inheritance rs role i))
                               % inherits)))))
 
-(defn remove-roles-inheritance
+(defn- remove-roles-inheritance
   [inheritances role]
   (into {}
         (map (fn [[role-name inherit]]
@@ -193,4 +202,13 @@
               (cond-> (update rs :roles dissoc r)
                       (:inherits rs) (update :inherits remove-roles-inheritance r)))
             role-set roles)))
+
+(defn delete-inheritance
+  [role-set role inheritance]
+  (let [inheritances (valid-inheritance role-set role inheritance)]
+    (reduce (fn [rs i]
+              (update-in rs [:inherits role] disj i))
+            role-set inheritances)))
+
+
 
