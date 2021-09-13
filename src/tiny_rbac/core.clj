@@ -27,7 +27,7 @@
 (defn inherit
   "Get role parents"
   [role-set role]
-  (get-in role-set [:roles role :inherits] #{}))
+  (get-in role-set [:inherits role] #{}))
 
 (defn roles
   "Get all roles from the role-set"

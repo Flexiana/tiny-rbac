@@ -312,13 +312,13 @@
                      (b/add-inheritance :poster :reader))]
     (is (= {:resources #{:post},
             :actions   {:post #{:read :write}},
+            :inherits {:poster #{:reader}}
             :roles     {:reader {:permits {:post
                                            {:read
                                             #{:own :friend}}}}
                         :poster {:permits  {:post
                                             {:write
-                                             #{:own}}}
-                                 :inherits #{:reader}}}}
+                                             #{:own}}}}}}
            role-set))
     (is (= #{:own :friend}
            (c/permissions role-set {:role     :poster
@@ -370,9 +370,9 @@
 (deftest building-role-set
   (let [expected {:resources #{:post},
                   :actions   {:post #{:read :write}},
+                  :inherits {:poster #{:reader}}
                   :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
-                              :poster {:permits  {:post {:write #{:own}}}
-                                       :inherits #{:reader}}}}]
+                              :poster {:permits  {:post {:write #{:own}}}}}}]
     (is (= expected
            (-> (b/add-resource {} :post)
                (b/add-action :post [:read :write])

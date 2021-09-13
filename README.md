@@ -60,9 +60,9 @@ All examples above providing the same result:
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
+   :inherits {:poster #{:reader}}
    :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}
-                        :inherits #{:reader}}}})
+               :poster {:permits  {:post {:write #{:own}}}}}})
 ```
 
 ### Core
@@ -267,10 +267,9 @@ role-set, functions are returning empty sets.
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
-   :roles     {:guest  {}
-               :reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}
-                        :inherits #{:reader}}}})
+   :inherits {:poster #{:reader}}
+   :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
+               :poster {:permits  {:post {:write #{:own}}}}}})
 
 ;; Get all resources from role-set
 (is (= #{:post}

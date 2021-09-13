@@ -129,7 +129,8 @@
   [role-set role inherits]
   (valid-role role-set inherits)
   (valid-cyclic-inheritance role-set role inherits)
-  (update-in role-set [:roles role :inherits] con-set (c/collify inherits)))
+  (-> (update-in role-set [:inherits role] con-set (c/collify inherits))
+      (add-role role)))
 
 (defn add-permission
   "Provides a permission for a role.
