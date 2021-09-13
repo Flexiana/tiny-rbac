@@ -161,7 +161,7 @@ to dependencies
     ;; Throws an exception if the given resource not defined
     (b/add-action :post :tag)
 
-    ;; defines roles int the given role-set
+    ;; defines roles into the given role-set
     (b/add-role [:reader :guest])
 
     ;; adds role to the given role-set

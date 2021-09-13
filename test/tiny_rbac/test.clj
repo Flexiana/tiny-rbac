@@ -399,8 +399,8 @@
 
 (deftest delete-resource-deletes-permissions
   (is (= {:resources #{},
-          :actions {}
-          :roles {:member {:permits {}}}}
+          :actions   {}
+          :roles     {:member {:permits {}}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/add-role :member)
@@ -410,11 +410,20 @@
 
 (deftest delete-action-deletes-permissions
   (is (= {:resources #{:comment}
-          :actions {:comment #{:tag}}
-          :roles {:guest {:permits {:comment {}}}}}
+          :actions   {:comment #{:tag}}
+          :roles     {:guest {:permits {:comment {}}}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)
              (b/add-permission :guest :comment :read ::b/all)
              (b/delete-action :comment :read)))
       "deleting action removes permissions"))
+
+(deftest delete-role
+  (is (= {}
+         (-> (b/add-resource {} :comment)
+             (b/add-action :comment [:read :tag])
+             (b/add-role :guest)
+             (b/delete-role :guest)
+             (c/roles)))
+      "deleting role removes it from role-set"))

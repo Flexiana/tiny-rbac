@@ -25,8 +25,12 @@
       actions)))
 
 (defn- valid-role [role-set role]
-  (when (some nil? (map #(c/role role-set %) (c/collify role)))
-    (throw (IllegalArgumentException. "referred role does not exists"))))
+  (let [roles (if (= ::all role)
+                (c/roles role-set)
+                (c/collify role))]
+    (if (some nil? (map #(c/role role-set %) roles))
+      (throw (IllegalArgumentException. "referred role does not exists"))
+      roles)))
 
 (defn- valid-permission [role-set role resource action permission]
   (let [permissions (if (= ::all permission)
@@ -176,3 +180,11 @@
                                      permits (permit-reducer role permits)
                                      inherits (add-inheritance role inherits)))
                            % roles)))))
+
+(defn delete-role [role-set role]
+  (let [roles (valid-role role-set role)]
+    (println roles)
+    (reduce (fn [rs r]
+              (update rs :roles dissoc r))
+            role-set roles)))
+
