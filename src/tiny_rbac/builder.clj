@@ -67,10 +67,7 @@
                                     (fn [role]
                                       (->> (map (fn [role]
                                                   (let [[r _] role]
-                                                    (update-in
-                                                      (apply hash-map role)
-                                                      [r :permits]
-                                                      dissoc res)))
+                                                    (update (apply hash-map role) r dissoc res)))
                                                 role)
                                            (into {}))))))
             role-set
@@ -93,7 +90,7 @@
 
 (defn remove-role-permit-action
   [permits resource action]
-  (update permits :permits #(into {} (map (fn [p] (remove-permit-action p resource action)) %))))
+  (into {} (map (fn [p] (remove-permit-action p resource action)) permits)))
 
 (defn remove-roles-action
   [roles resource action]
@@ -140,7 +137,7 @@
   (valid-resource role-set resource)
   (valid-action role-set resource action)
   (valid-role role-set role)
-  (update-in role-set [:roles role :permits resource action] con-set (c/collify permission)))
+  (update-in role-set [:roles role resource action] con-set (c/collify permission)))
 
 (defn delete-permission
   "Revokes a permission for a user, for an action on resource
@@ -152,7 +149,7 @@
   (valid-role role-set role)
   (let [acc (valid-permission role-set role resource action permission)]
     (reduce (fn [rs ac]
-              (update-in rs [:roles role :permits resource action] disj ac))
+              (update-in rs [:roles role resource action] disj ac))
             role-set
             acc)))
 
@@ -170,17 +167,19 @@
   If anything goes wrong throws Exception"
   ([role-set]
    (init {} role-set))
-  ([initial-set {:keys [resources actions roles]}]
+  ([initial-set {:keys [resources actions roles inherits]}]
    (cond-> initial-set
            resources (add-resource resources)
            actions (#(reduce (fn [acc [resource action]]
                                (add-action acc resource action))
                              % actions))
-           roles (#(reduce (fn [acc [role {:keys [permits inherits]}]]
+           roles (#(reduce (fn [acc [role permits]]
                              (cond-> (add-role acc role)
-                                     permits (permit-reducer role permits)
-                                     inherits (add-inheritance role inherits)))
-                           % roles)))))
+                                     permits (permit-reducer role permits)))
+                           % roles))
+           inherits (#(reduce (fn [rs [role i]]
+                                  (add-inheritance rs role i))
+                              % inherits)))))
 
 (defn delete-role [role-set role]
   (let [roles (valid-role role-set role)]

@@ -27,9 +27,9 @@ With the builder you can define role set via
 ```clojure
 (b/init {:resources :post
          :actions   {:post [:read :write]}
-         :roles     {:reader {:permits {:post {:read [:own :friend]}}}
-                     :poster {:permits  {:post {:write :own}}
-                              :inherits :reader}}})
+         :inherits  {:poster :reader}
+         :roles     {:reader {:post {:read [:own :friend]}}
+                     :poster {:post {:write :own}}}})
 ```
 
 - multiple maps
@@ -37,9 +37,9 @@ With the builder you can define role set via
 ```clojure
 (-> (b/init {:resources :post})
     (b/init {:actions {:post [:read :write]}})
-    (b/init {:roles {:reader {:permits {:post {:read #{:own :friend}}}}}})
-    (b/init {:roles {:poster {:permits  {:post {:write #{:own}}}
-                              :inherits #{:reader}}}}))
+    (b/init {:roles {:reader {:post {:read #{:own :friend}}}}})
+    (b/init {:roles {:poster {:post {:write #{:own}}}}})
+    (b/init {:inherits {:poster :reader}}))
 ```
 
 - code
@@ -60,9 +60,9 @@ All examples above providing the same result:
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
-   :inherits {:poster #{:reader}}
-   :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}}}})
+   :inherits  {:poster #{:reader}}
+   :roles     {:reader {:post {:read #{:own :friend}}}
+               :poster {:post {:write #{:own}}}}})
 ```
 
 ### Core
@@ -267,9 +267,9 @@ role-set, functions are returning empty sets.
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
-   :inherits {:poster #{:reader}}
-   :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}}}})
+   :inherits  {:poster #{:reader}}
+   :roles     {:reader {:post {:read #{:own :friend}}}
+               :poster {:post {:write #{:own}}}}})
 
 ;; Get all resources from role-set
 (is (= #{:post}
@@ -298,10 +298,9 @@ role-set, functions are returning empty sets.
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
-   :roles     {:guest  {}
-               :reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}
-                        :inherits #{:reader}}}})
+   :inherits  {:poster #{:reader}}
+   :roles     {:reader {:post {:read #{:own :friend}}}
+               :poster {:post {:write #{:own}}}}})
 
 ;; Get all actions for resource from role-set
 (is (= #{:read :write}
@@ -334,10 +333,9 @@ role-set, functions are returning empty sets.
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
-   :roles     {:guest  {}
-               :reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}
-                        :inherits #{:reader}}}})
+   :inherits  {:poster #{:reader}}
+   :roles     {:reader {:post {:read #{:own :friend}}}
+               :poster {:post {:write #{:own}}}}})
 
 ;; Get all roles from role-set
 (is (= {:guest  {}
@@ -369,10 +367,9 @@ role-set, functions are returning empty sets.
 (def role-set
   {:resources #{:post},
    :actions   {:post #{:read :write}},
-   :roles     {:guest  {}
-               :reader {:permits {:post {:read #{:own :friend}}}}
-               :poster {:permits  {:post {:write #{:own}}}
-                        :inherits #{:reader}}}})
+   :inherits  {:poster #{:reader}}
+   :roles     {:reader {:post {:read #{:own :friend}}}
+               :poster {:post {:write #{:own}}}}})
 
 ;; Get all permissions for resource and action
 (is (= #{:own :friend}

@@ -312,13 +312,13 @@
                      (b/add-inheritance :poster :reader))]
     (is (= {:resources #{:post},
             :actions   {:post #{:read :write}},
-            :inherits {:poster #{:reader}}
-            :roles     {:reader {:permits {:post
-                                           {:read
-                                            #{:own :friend}}}}
-                        :poster {:permits  {:post
-                                            {:write
-                                             #{:own}}}}}}
+            :inherits  {:poster #{:reader}}
+            :roles     {:reader {:post
+                                 {:read
+                                  #{:own :friend}}}
+                        :poster {:post
+                                 {:write
+                                  #{:own}}}}}
            role-set))
     (is (= #{:own :friend}
            (c/permissions role-set {:role     :poster
@@ -370,9 +370,9 @@
 (deftest building-role-set
   (let [expected {:resources #{:post},
                   :actions   {:post #{:read :write}},
-                  :inherits {:poster #{:reader}}
-                  :roles     {:reader {:permits {:post {:read #{:own :friend}}}}
-                              :poster {:permits  {:post {:write #{:own}}}}}}]
+                  :inherits  {:poster #{:reader}}
+                  :roles     {:reader {:post {:read #{:own :friend}}}
+                              :poster {:post {:write #{:own}}}}}]
     (is (= expected
            (-> (b/add-resource {} :post)
                (b/add-action :post [:read :write])
@@ -385,22 +385,22 @@
     (is (= expected
            (b/init {:resources :post
                     :actions   {:post [:read :write]}
-                    :roles     {:reader {:permits {:post {:read [:own :friend]}}}
-                                :poster {:permits  {:post {:write :own}}
-                                         :inherits :reader}}}))
+                    :inherits  {:poster :reader}
+                    :roles     {:reader {:post {:read [:own :friend]}}
+                                :poster {:post {:write :own}}}}))
         "Build from one map")
     (is (= expected
            (-> (b/init {:resources :post})
                (b/init {:actions {:post [:read :write]}})
-               (b/init {:roles {:reader {:permits {:post {:read #{:own :friend}}}}}})
-               (b/init {:roles {:poster {:permits  {:post {:write #{:own}}}
-                                         :inherits #{:reader}}}})))
+               (b/init {:roles {:reader {:post {:read #{:own :friend}}}}})
+               (b/init {:roles {:poster {:post {:write #{:own}}}}})
+               (b/init {:inherits {:poster :reader}})))
         "Build from multiple maps")))
 
 (deftest delete-resource-deletes-permissions
   (is (= {:resources #{},
           :actions   {}
-          :roles     {:member {:permits {}}}}
+          :roles     {:member {}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment :read)
              (b/add-role :member)
@@ -411,7 +411,7 @@
 (deftest delete-action-deletes-permissions
   (is (= {:resources #{:comment}
           :actions   {:comment #{:tag}}
-          :roles     {:guest {:permits {:comment {}}}}}
+          :roles     {:guest {:comment {}}}}
          (-> (b/add-resource {} :comment)
              (b/add-action :comment [:read :tag])
              (b/add-role :guest)

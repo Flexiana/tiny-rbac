@@ -47,7 +47,7 @@
    (permissions role-set role resource action #{}))
   ([role-set role resource action acc]
    (->> (let [inherit (inherit role-set role)]
-          (cond-> (into acc (collify (get-in role-set [:roles role :permits resource action])))
+          (cond-> (into acc (collify (get-in role-set [:roles role resource action])))
                   inherit (into (mapcat identity
                                         (for [i (collify inherit)]
                                           (permissions role-set i resource action acc))))))
