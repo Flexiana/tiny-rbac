@@ -11,28 +11,37 @@
                                    :role :poster}
                                   {:id   3
                                    :name "Biggus Dickus"
-                                   :role :poster}]
+                                   :role :poster}
+                                  {:id   4
+                                   :name "Clement Mason"
+                                   :role :only-friends}]
                     :friendships [{:who-id  0
                                    :whom-id 1
                                    :status  :active}
                                   {:who-id  2
                                    :whom-id 1
                                    :status  :pending}
+                                  {:who-id  4
+                                   :whom-id 1
+                                   :status  :active}
                                   {:who-id  0
                                    :whom-id 2
                                    :status  :active}]
                     :posts       [{:id         0
                                    :creator-id 1
                                    :content    "I thought Christmas only comes once a year"
-                                   :created-at 1631614711}
+                                   :created-at 1631614711
+                                   :visible :friends}
                                   {:id         1
                                    :creator-id 3
                                    :content    "Incontinentia! please forgive me!"
-                                   :created-at 1631615592}
+                                   :created-at 1631615592
+                                   :visible :public}
                                   {:id         2
                                    :creator-id 2
                                    :content    "Just hangin' all day with @dick & @harry"
-                                   :created-at 1631615592}]}))
+                                   :created-at 1631615592
+                                   :visible :public}]}))
 
 (defn fetch-one
   [resource id]
@@ -43,5 +52,7 @@
 (defn fetch-all
   [resource]
   (get @_db resource))
+
+
 
 
