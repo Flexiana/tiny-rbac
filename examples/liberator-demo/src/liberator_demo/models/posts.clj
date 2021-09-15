@@ -19,6 +19,6 @@
          (sort-by :created-at))))
 
 (defn new-post [user content visibility]
-  (db/add-post {:user-id (:id user)
+  (db/add-post {:creator-id (:id user)
                 :visible visibility
                 :content content}))
