@@ -15,7 +15,7 @@
                           :friends (filter #(friends (:creator-id %)) posts)))]
     (->> visible-posts
          (mapcat identity)
-         dedupe
+         (into #{})
          (sort-by :created-at))))
 
 (defn new-post [user content visibility]
