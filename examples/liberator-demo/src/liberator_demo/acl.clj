@@ -5,12 +5,11 @@
   (-> {}
       (b/add-resource [:post :comment])
       (b/add-action :post [:read :create :delete :comment])
-      (b/add-action :comment [:read :modify :delete])
+      (b/add-action :comment [:modify :delete])
       (b/add-role [:lurker :poster :only-friends])
       (b/add-permission :only-friends :post :read :friends)
       (b/add-inheritance :poster :lurker)
       (b/add-permission :lurker :post :read :all)
-      (b/add-permission :lurker :comment :read :all)
       (b/add-permission :poster :post :create :all)
       (b/add-permission :poster :post :delete :own)
       (b/add-permission :poster :post :comment :friend)

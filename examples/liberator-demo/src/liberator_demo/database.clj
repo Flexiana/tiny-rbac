@@ -41,7 +41,12 @@
                                    :creator-id 2
                                    :content    "Just hangin' all day with @dick & @harry"
                                    :created-at 1631615592
-                                   :visible :public}]}))
+                                   :visible :public}]
+                    :comments [{:id 0
+                                :creator-id 0
+                                :post-id 0
+                                :content "Was that a Christmas joke?"
+                                :created-at 1631693159}]}))
 
 (defn fetch-one
   [resource id]
@@ -53,6 +58,11 @@
   [resource]
   (get @_db resource))
 
+(defn fetch-comments-by-post-id
+  [post-id]
+  (->> (:comments @_db)
+       (filter #(= post-id (:post-id %)))
+       (sort-by :created-at)))
 
 
 

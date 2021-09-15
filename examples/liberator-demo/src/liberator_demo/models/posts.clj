@@ -1,6 +1,5 @@
 (ns liberator-demo.models.posts
-  (:require [liberator-demo.database :as db]
-            [tiny-rbac.core :as c]))
+  (:require [liberator-demo.database :as db]))
 
 (defn fetch-posts
   ([post-id]
