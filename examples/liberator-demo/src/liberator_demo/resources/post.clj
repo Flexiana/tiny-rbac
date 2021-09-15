@@ -37,13 +37,19 @@
                            (and (acl/has-permission role-set acl)
                                 {:permissions (acl/permissions role-set acl)})))})
 
+  :put! (fn [{:keys [request user] :as ctx}]
+          (let [content (get-in request [:params "content"])
+                visibility (keyword (get-in request [:params "visibility"] "public"))]
+            (post-model/new-post user content visibility)))
+
+
+
   :available-media-types ["application/json"]
 
   :handle-ok (fn [{:keys [user permissions]}]
                (let [friends (friend-model/get-friends-ids (:id user))
                      visible-posts (post-model/fetch-posts permissions friends post-id)
                      posts-with-comments (map comment-model/comments->>post visible-posts)]
-
                  {:posts posts-with-comments})))
 
 

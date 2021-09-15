@@ -6,6 +6,7 @@
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler liberator-demo.core/handler}
   :dependencies [[org.clojure/clojure "1.10.1"]
+                 [tick "0.5.0-RC1"]
                  [liberator "0.15.2"]
                  [compojure "1.6.2"]
                  [javax.servlet/servlet-api "2.5"]

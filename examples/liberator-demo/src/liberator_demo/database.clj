@@ -1,4 +1,5 @@
-(ns liberator-demo.database)
+(ns liberator-demo.database
+  (:require [tick.core :as t]))
 
 (defonce _db (atom {:users       [{:id   0
                                    :name "James Bond"
@@ -31,28 +32,28 @@
                                    :creator-id 1
                                    :content    "I thought Christmas only comes once a year"
                                    :created-at 1631614711
-                                   :visible :friends}
+                                   :visible    :friends}
                                   {:id         1
                                    :creator-id 3
                                    :content    "Incontinentia! please forgive me!"
                                    :created-at 1631615592
-                                   :visible :public}
+                                   :visible    :public}
                                   {:id         2
                                    :creator-id 2
                                    :content    "Just hangin' all day with @dick & @harry"
                                    :created-at 1631615592
-                                   :visible :public}]
-                    :comments [{:id 0
-                                :creator-id 0
-                                :post-id 0
-                                :content "Was that a Christmas joke?"
-                                :created-at 1631693159}]}))
+                                   :visible    :public}]
+                    :comments    [{:id         0
+                                   :creator-id 0
+                                   :post-id    0
+                                   :content    "Was that a Christmas joke?"
+                                   :created-at 1631693159}]}))
 
 (defn fetch-one
   [resource id]
   (some->> (get @_db resource)
-       (filter #(= id (str (:id %))))
-       first))
+           (filter #(= id (str (:id %))))
+           first))
 
 (defn fetch-all
   [resource]
@@ -63,6 +64,19 @@
   (->> (:comments @_db)
        (filter #(= post-id (:post-id %)))
        (sort-by :created-at)))
+
+(defn next-id
+  [resource]
+  (->> (get @_db resource)
+       (map :id)
+       (apply max)
+       inc))
+
+(defn add-post
+  [post]
+  (let [new-post (assoc post :created-at (t/long (t/now)) :id (next-id :posts))]
+    (swap! _db update :posts conj new-post)))
+
 
 
 
