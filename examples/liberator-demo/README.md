@@ -17,7 +17,7 @@ The example has two resources:
 
 ### Roles
 
-#### Posts
+* roles on posts resource
 
 | Role | can read post | can create post | update post | delete post | 
 |------------------|--------------------|-----|-----|-----|
@@ -25,7 +25,7 @@ The example has two resources:
 | **poster**       | public own friends | Yes | own | own |
 | **friends-only** | own friends        | No  | -   | -   |
 
-#### Comments
+* roles on comments resource
 
 _**Comment actions aren't implemented yet**_
 
