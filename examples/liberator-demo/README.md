@@ -13,7 +13,7 @@ Start the application with `lein ring server`, open http://localhost:3000/
 The example has two resources:
 
 * posts
-* comments
+* comments _**no actions are implemented yet**_
 
 ### Roles
 
