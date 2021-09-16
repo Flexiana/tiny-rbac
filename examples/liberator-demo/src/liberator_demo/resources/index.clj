@@ -6,13 +6,45 @@
   :available-media-types ["text/html"]
   :handle-ok (html [:html
                     [:h1 "Welcome to tiny RBAC liberator demo"]
-                    [:h2 "Available links"]
                     [:div
-                     [:p "\"/\" this page"]
-                     [:p "\"/user/{user-id}/posts\" see all posts as user"]
-                     [:p "\"/user/{user-id}/posts/{post-id}\" see a post as user."]
-                     [:p "users at start-up are available with user-id from 0 to 4"]
-                     [:p "posts with post-id from 0 to 2"]
-                     [:p "friends are 0-1, 0-2, 4-1"]
-                     [:p "the user with id 4 can see only his friend's posts"]
-                     [:p "the post with id 0 is only visible for friends of user-id 0"]]]))
+                     [:h2 "Testing with postman"]
+                     [:p "Because it's just a quick example, there are no tests included."]
+                     [:table
+                      [:thead
+                       [:tr
+                        [:th "method"]
+                        [:th "path"]
+                        [:th "result"]]]
+                      [:tbody
+                       [:tr
+                        [:td "GET"]
+                        [:td "localhost:3000"]
+                        [:td "welcome screen"]]
+                       [:tr
+                        [:td "GET"]
+                        [:td "localhost:3000/user/{{user-id}}/posts"]
+                        [:td "All posts and comments which visible for the user"]]
+                       [:tr
+                        [:td "GET"]
+                        [:td "localhost:3000/user/{{user-id}}/posts/{{post-id}}"]
+                        [:td "One post and comments if it's visible for the user"]]
+                       [:tr
+                        [:td "PUT"]
+                        [:td "localhost:3000/user/{{user-id}}/posts"]
+                        [:td "Creates a post if the user has the ability"]]
+                       [:tr
+                        [:td "POST"]
+                        [:td "localhost:3000/user/{{user-id}}/posts/{{post-id}}"]
+                        [:td "Updates a post if the user has the ability"]]
+                       [:tr
+                        [:td "DELETE"]
+                        [:td "localhost:3000/user/{{user-id}}/posts/{{post-id}}"]
+                        [:td "Deletes a post if the user has the ability"]]]]
+                     [:p "When a user is not permitted to make an action, by its role or on a given post, then the response status is 403: Forbidden"]
+                     [:h3 "Creating and updating a post"]
+                     [:p "From postman the body should be " [:code "x-www-form-urlencoded"] "."]
+                     [:p "The used fields are:"]
+                     [:ul
+                      [:li "content"]
+                      [:li "visible"]]
+                     [:p "If the visible parameter is not set, then it's defaults to " [:code "public"] "."]]]))
