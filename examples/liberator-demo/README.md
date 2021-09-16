@@ -65,7 +65,7 @@ Because it's just a quick example, there are no tests included.
 | GET    | localhost:3000/user/{{user-id}}/posts             | All posts and comments which visible for the user  |
 | GET    | localhost:3000/user/{{user-id}}/posts/{{post-id}} | One post and comments if it's visible for the user |
 | PUT    | localhost:3000/user/{{user-id}}/posts             | Creates a post if the user has the ability         |
-| POST   | localhost:3000/user/{{user-id}}/posts/{{post-id}} | Updates a post if the user has the ability   |
+| PATCH  | localhost:3000/user/{{user-id}}/posts/{{post-id}} | Updates a post if the user has the ability   |
 | DELETE | localhost:3000/user/{{user-id}}/posts/{{post-id}} | Deletes a post if the user has the ability   |
 
 When a user is not permitted to make an action, by its role or on a given post, then the response status is 403: Forbidden 

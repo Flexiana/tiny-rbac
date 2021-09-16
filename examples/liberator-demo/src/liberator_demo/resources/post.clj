@@ -38,27 +38,27 @@
 (defresource post
   [user-id post-id]
   :available-media-types ["application/json"]
-  :allowed-methods [:post :get :delete]
+  :allowed-methods [:patch :get :delete]
   :initialize-context (fn [_] {:user (user-model/fetch-user user-id)})
 
   :allowed? (by-method
               {:get    (fn [{:keys [user]}]
                          (when-let [post (owned-post user :read post-id)]
                            {:post post}))
-               :post   (fn [{:keys [user]}]
+               :patch  (fn [{:keys [user]}]
                          (when-let [post (owned-post user :update post-id)]
                            {:post post}))
                :delete (fn [{:keys [user]}]
                          (when-let [post (owned-post user :delete post-id)]
                            {:post post}))})
 
-  :post! (fn [{:keys [request post]}]
-           (let [visible (get-in request [:params "visible"])
-                 content (get-in request [:params "content"])
-                 post-update (cond-> post
-                                     visible (assoc :visible visible)
-                                     content (assoc :content content))]
-             (post-model/update-post post-update)))
+  :patch! (fn [{:keys [request post]}]
+            (let [visible (get-in request [:params "visible"])
+                  content (get-in request [:params "content"])
+                  post-update (cond-> post
+                                      visible (assoc :visible visible)
+                                      content (assoc :content content))]
+              (post-model/update-post post-update)))
 
   :delete! (fn [{:keys [post]}]
              (post-model/delete-post post))

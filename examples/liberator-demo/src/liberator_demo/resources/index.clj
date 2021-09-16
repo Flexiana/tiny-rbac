@@ -33,7 +33,7 @@
                         [:td "localhost:3000/user/{{user-id}}/posts"]
                         [:td "Creates a post if the user has the ability"]]
                        [:tr
-                        [:td "POST"]
+                        [:td "PATCH"]
                         [:td "localhost:3000/user/{{user-id}}/posts/{{post-id}}"]
                         [:td "Updates a post if the user has the ability"]]
                        [:tr
