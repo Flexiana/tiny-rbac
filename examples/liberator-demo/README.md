@@ -1,12 +1,10 @@
 # liberator-demo tor tiny RBAC
 
-Example project to demonstrate tiny-RBAC library capabilities
+Example to demonstrate tiny-RBAC library capabilities
 
 ## Usage
 
-Start the application with
-> * lein ring server
->* open http://localhost:3000/
+Start the application with `lein ring server`, open http://localhost:3000/
 
 ## Description
 
