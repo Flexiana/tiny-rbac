@@ -59,6 +59,9 @@
                                      content (assoc :content content))]
              (post-model/update-post post-update)))
 
+  :delete! (fn [{:keys [post]}]
+             (post-model/delete-post post))
+
   :handle-ok (fn [{:keys [post]}]
                {:posts [post]}))
 

@@ -44,3 +44,7 @@
   [post-update]
   (db/update-post post-update))
 
+(defn delete-post [post]
+  (db/delete-post post))
+
+

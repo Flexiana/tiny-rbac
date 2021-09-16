@@ -77,13 +77,21 @@
   (let [new-post (assoc post :created-at (t/long (t/now)) :id (next-id :posts))]
     (swap! _db update :posts conj new-post)))
 
-(defn- update
+(defn- delete-entity
   [c e]
-  (-> (remove #(= (:id e) (:id %)) c)
+  (remove #(= (:id e) (:id %)) c))
+
+(defn- update-entity
+  [c e]
+  (-> (delete-entity c e)
       (conj e)))
 
 (defn update-post [post-update]
-  (swap! _db update :posts update post-update))
+  (swap! _db update :posts update-entity post-update))
+
+(defn delete-post [post]
+  (swap! _db update :posts delete-entity post))
+
 
 
 
