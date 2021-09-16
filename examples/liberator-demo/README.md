@@ -8,6 +8,9 @@ Start the application with `lein ring server`, open http://localhost:3000/
 
 ## Description
 
+This project uses tiny-RBAC to determine if a user is authorized to perform a particular operation on a resource and
+helps it verify ownership of the data.
+
 ### Resources
 
 The example has two resources:
@@ -68,13 +71,15 @@ Because it's just a quick example, there are no tests included.
 | PATCH  | localhost:3000/user/{{user-id}}/posts/{{post-id}} | Updates a post if the user has the ability   |
 | DELETE | localhost:3000/user/{{user-id}}/posts/{{post-id}} | Deletes a post if the user has the ability   |
 
-When a user is not permitted to make an action, by its role or on a given post, then the response status is 403: Forbidden 
+When a user is not permitted to make an action, by its role or on a given post, then the response status is 403:
+Forbidden
 
 ### Creating and updating a post
 
-From postman the body should be `x-www-form-urlencoded`. 
+From postman the body should be `x-www-form-urlencoded`.
 
 The used fields are:
+
 - content
 - visible
 

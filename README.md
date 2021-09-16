@@ -127,6 +127,8 @@ With the core you can query for
 
 ## Setup
 
+> lein install
+
 Add
 
 ```clojure
