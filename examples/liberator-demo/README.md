@@ -70,6 +70,16 @@ Because it's just a quick example, there are no tests included.
 
 When a user is not permitted to make an action, by its role or on a given post, then the response status is 403: Forbidden 
 
+### Creating and updating a post
+
+From postman the body should be `x-www-form-urlencoded`. 
+
+The used fields are:
+- content
+- visible
+
+If the visible parameter is not set, then it's defaults to `public`.
+
 ## License
 
 Copyright © 2021 [g-krisztian](https://github.com/g-krisztian)
