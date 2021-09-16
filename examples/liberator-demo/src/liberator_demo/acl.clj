@@ -34,3 +34,11 @@
         permissions (acl/permissions role-set acl)
         friends (user-model/get-friends-ids user-id)]
    (first (post-model/fetch-posts permissions user-id friends post-id))))
+
+(defn owned-posts
+  [user action]
+  (let [user-id (:id user)
+        acl (acl-post user action)
+        permissions (acl/permissions role-set acl)
+        friends (user-model/get-friends-ids user-id)]
+    (post-model/fetch-posts permissions user-id friends)))
