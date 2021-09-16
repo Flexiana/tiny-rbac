@@ -7,8 +7,8 @@
 (defroutes app
   (ANY "/" [] (index/resource))
   (context "/user/:user-id" [user-id]
-    (ANY "/posts" [] (post/resource-for-user user-id :all))
-    (ANY "/posts/:post-id" [post-id] (post/resource-for-user user-id post-id))))
+    (ANY "/posts" [] (post/posts user-id))
+    (ANY "/posts/:post-id" [post-id] (post/post user-id post-id))))
 
 (def handler
   (-> app
