@@ -3,7 +3,6 @@
 [![Clojars Project](https://img.shields.io/clojars/v/com.flexiana/tiny-rbac.svg)](https://clojars.org/com.flexiana/tiny-rbac)
 > Small role based access control library for clojure
 
-
 ## Table of Contents
 
 * [Features](#features)
@@ -33,7 +32,9 @@ With the builder you can define role set via
          :tiny-rbac.core/roles     {:reader {:post {:read [:own :friend]}}
                                     :poster {:post {:write :own}}}})
 ```
+
 - non namespaced map
+
 ```clojure
 (b/init {:resources :post
          :actions   {:post [:read :write]}
@@ -41,6 +42,7 @@ With the builder you can define role set via
          :roles     {:reader {:post {:read [:own :friend]}}
                      :poster {:post {:write :own}}}})
 ```
+
 - multiple maps
 
 ```clojure
@@ -135,8 +137,6 @@ With the core you can query for
 ```
 
 ## Setup
-
-> lein install
 
 Add
 
