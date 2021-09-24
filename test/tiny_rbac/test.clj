@@ -390,6 +390,13 @@
                                    :poster {:post {:write :own}}}}))
         "Build from one map")
     (is (= expected
+           (b/init {:resources :post
+                    :actions   {:post [:read :write]}
+                    :inherits  {:poster :reader}
+                    :roles     {:reader {:post {:read [:own :friend]}}
+                                :poster {:post {:write :own}}}}))
+        "Build from non namespace map")
+    (is (= expected
            (-> (b/init {::c/resources :post})
                (b/init {::c/actions {:post [:read :write]}})
                (b/init {::c/roles {:reader {:post {:read #{:own :friend}}}}})

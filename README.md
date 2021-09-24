@@ -31,7 +31,14 @@ With the builder you can define role set via
          :tiny-rbac.core/roles     {:reader {:post {:read [:own :friend]}}
                                     :poster {:post {:write :own}}}})
 ```
-
+- non namespaced map
+```clojure
+(b/init {:resources :post
+         :actions   {:post [:read :write]}
+         :inherits  {:poster :reader}
+         :roles     {:reader {:post {:read [:own :friend]}}
+                     :poster {:post {:write :own}}}})
+```
 - multiple maps
 
 ```clojure

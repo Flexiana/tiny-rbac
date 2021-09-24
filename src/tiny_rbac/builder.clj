@@ -176,19 +176,38 @@
   If anything goes wrong throws Exception"
   ([role-set]
    (init {} role-set))
-  ([initial-set {:keys [::c/resources ::c/actions ::c/roles ::c/inherits]}]
-   (cond-> initial-set
-           resources (add-resource resources)
-           actions (#(reduce (fn [acc [resource action]]
-                               (add-action acc resource action))
-                             % actions))
-           roles (#(reduce (fn [acc [role permits]]
+  ([initial-set role-set]
+   (let [{:keys [::c/resources
+                 ::c/actions
+                 ::c/roles
+                 ::c/inherits]} role-set
+         {res :resources
+          act :actions
+          rol :roles
+          inh :inherits} role-set]
+     (cond-> initial-set
+             resources (add-resource resources)
+             res (add-resource res)
+             actions (#(reduce (fn [acc [resource action]]
+                                 (add-action acc resource action))
+                               % actions))
+             act (#(reduce (fn [acc [resource action]]
+                             (add-action acc resource action))
+                           % act))
+             roles (#(reduce (fn [acc [role permits]]
+                               (cond-> (add-role acc role)
+                                       permits (permit-reducer role permits)))
+                             % roles))
+             rol (#(reduce (fn [acc [role permits]]
                              (cond-> (add-role acc role)
                                      permits (permit-reducer role permits)))
-                           % roles))
-           inherits (#(reduce (fn [rs [role i]]
-                                (add-inheritance rs role i))
-                              % inherits)))))
+                           % rol))
+             inherits (#(reduce (fn [rs [role i]]
+                                  (add-inheritance rs role i))
+                                % inherits))
+             inh (#(reduce (fn [rs [role i]]
+                             (add-inheritance rs role i))
+                           % inh))))))
 
 (defn- remove-roles-inheritance
   [inheritances role]
