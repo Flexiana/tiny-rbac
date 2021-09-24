@@ -1,6 +1,8 @@
 # Tiny RBAC
 
+[![Clojars Project](https://img.shields.io/clojars/v/com.flexiana/tiny-rbac.svg)](https://clojars.org/com.flexiana/tiny-rbac)
 > Small role based access control library for clojure
+
 
 ## Table of Contents
 
@@ -138,9 +140,7 @@ With the core you can query for
 
 Add
 
-```clojure
-[clojars link and version]                  ;;TODO
-```
+[![Clojars Project](https://img.shields.io/clojars/v/com.flexiana/tiny-rbac.svg)](https://clojars.org/com.flexiana/tiny-rbac)
 
 to dependencies
 
